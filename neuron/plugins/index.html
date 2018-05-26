@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript">
+            var sock = null;
+            var wsuri = "ws://127.0.0.1:8080/ws";
+            if ("WebSocket" in window) {
+                sock = new WebSocket(wsuri)
+            } else {
+                console.log("Browser does not support WebSockets!");
+            }
+
+            if (sock) {
+                sock.onopen = function () {
+                    console.log("Connected to " + wsuri);
+                }
+                sock.onclose = function (e) {
+                    console.log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+                    sock = null;
+                }
+                sock.onmessage = function (e) {
+                    console.log("Got echo: " + e.data);
+                }
+            }
+
+            function send() {
+                if (sock) {
+                    sock.send("hello world")
+                } else {
+                    console.log("Not connected")
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+        <button onclick="send();">Test</button>
+        See console
+    </body>
+</html>
