@@ -1,1 +1,7 @@
+# Compiled files
+__pycache__/
+
+# IDE files
+*.pyproj
+*.sln
 .vs/
