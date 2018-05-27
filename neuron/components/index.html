@@ -3,9 +3,11 @@
     <head>
         <script type="text/javascript">
             var sock = null;
-            var wsuri = "ws://127.0.0.1:8080/ws";
+            var wsuri = "ws://" + location.host + "/ws";
             if ("WebSocket" in window) {
                 sock = new WebSocket(wsuri)
+            } else if ("MozWebSocket" in window) {
+                sock = new MozWebSocket(wsuri);
             } else {
                 console.log("Browser does not support WebSockets!");
             }

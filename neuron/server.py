@@ -9,18 +9,21 @@ from twisted.web.static import File
 from autobahn.twisted.websocket import WebSocketServerFactory
 from autobahn.twisted.resource import WebSocketResource
 
-from neuron import protocol
+from neuron.protocol import DispatcherProtocol
 
 
 def run_server(port=8080):
     log.startLogging(sys.stdout)
-    factory = WebSocketServerFactory("ws://127.0.0.1:" + str(port))
-    factory.protocol = protocol.SimpleProtocol
-    resource = WebSocketResource(factory)
+    wsFactory = WebSocketServerFactory("ws://127.0.0.1:" + str(port))
+    wsFactory.protocol = SimpleProtocol
+    wsResource = WebSocketResource(wsFactory)
 
-    full_path = os.path.realpath(__file__)
-    path, _ = os.path.split(full_path)
-    root = File(path + "/plugins")
+    # Static files should be in the 'components' folder in the same
+    # directory as this file
+    path, _ = os.path.split(os.path.realpath(__file__))
+    root = File(path + "/components")
+
+    # Add a path for websocket connection
     root.putChild(b"ws", resource)
 
     site = Site(root)
