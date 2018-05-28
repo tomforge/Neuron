@@ -9,7 +9,7 @@ from twisted.web.static import File
 from autobahn.twisted.websocket import WebSocketServerFactory
 from autobahn.twisted.resource import WebSocketResource
 
-from neuron.protocol import DispatcherProtocol
+from neuron.protocol import SimpleProtocol
 
 
 def run_server(port=8080):
@@ -24,7 +24,7 @@ def run_server(port=8080):
     root = File(path + "/components")
 
     # Add a path for websocket connection
-    root.putChild(b"ws", resource)
+    root.putChild(b"ws", wsResource)
 
     site = Site(root)
     reactor.listenTCP(port, site)
