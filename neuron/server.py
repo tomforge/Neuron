@@ -13,10 +13,12 @@ from autobahn.twisted.resource import WebSocketResource
 
 from neuron import settings
 
+logger = logging.getLogger("server")
+
 class WSProtocol(WebSocketServerProtocol):
     
     def onConnect(self, request):
-        print("{} connected".format(request.peer))
+        logger.info("{} connected".format(request.peer))
         # TODO: Authentication here?  Multiple WS protocol?
         return None
 
@@ -26,7 +28,7 @@ class WSProtocol(WebSocketServerProtocol):
         Register the client to factory so that it can send and
         receive messages
         """
-        print("WebSocket opened with {}".format(self.peer))
+        logger.info("WebSocket opened with {}".format(self.peer))
         self.factory.registerClient(self)
 
     def onMessage(self, payload, isBinary):
@@ -34,11 +36,11 @@ class WSProtocol(WebSocketServerProtocol):
             event, data = json.loads(payload.decode('utf8'))
             self.factory.dispatch(event, data, self)
         except (json.JSONDecodeError, ValueError):
-            logging.WARNING("Received invalid message " + str(payload)
-                            + " from " + self.peer)
+            logger.warning("Received invalid message " + str(payload)
+                            + " from " + str(self.peer))
 
     def onClose(self, wasClean, code, reason):
-        print("{} disconnected".format(self.peer))
+        logger.info("{} disconnected".format(self.peer))
         self.factory.unregisterClient(self)
         super().onClose(wasClean, code, reason)
 
@@ -98,7 +100,7 @@ class WSManagerFactory(WebSocketServerFactory):
                 if not self.eventSubscriptions[event]:
                     self.eventSubscriptions.pop(event)
         except KeyError:
-            logging.ERROR("Trying to remove non-existing subscription of "
+            logger.error("Trying to remove non-existing subscription of "
                           + str(subscriber)
                           + ("" if event is None else " to " + str(event)))
 
@@ -115,11 +117,12 @@ class WSManagerFactory(WebSocketServerFactory):
                 try:
                     subscriber.notify(event, data, sender.peer)
                 except (AttributeError, TypeError):
-                    logging.ERROR("Subscriber " + str(subscriber)
+                    logger.error("Subscriber " + str(subscriber)
                                   + " does not implement the 'notify(event, data, addr)' endpoint")
         except KeyError:
-            logging.WARNING("Received unrecognized event " + str(event)
+            logger.warning("Received unrecognized event " + str(event)
                             + " from " + sender.peer)
+
     def constructPayload(event, data):
         """
         Helper function to construct a payload for sending to clients
@@ -138,10 +141,13 @@ class WSManagerFactory(WebSocketServerFactory):
         elif addr in self.clients:
             self.clients[addr].sendMessage(payload, isBinary=False)
         else:
-            logging.ERROR("Client {} disconnected. Message not sent".format(addr))
+            logger.error("Client {} disconnected. Message not sent".format(addr))
 
 def run_server(port=8080):
-    log.startLogging(sys.stdout)
+    # Make twisted report logs with python logging module
+    twisted_log = log.PythonLoggingObserver(loggerName="server")
+    twisted_log.start()
+
     factory = WSManagerFactory("ws://127.0.0.1:" + str(port))
     factory.protocol = WSProtocol
     factory.setProtocolOptions(**settings.AUTOBAHN_WEBSOCKET_SETTINGS)
