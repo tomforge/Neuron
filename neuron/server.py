@@ -1,5 +1,3 @@
-import sys
-import os
 import json
 import logging
 from twisted.python import log
@@ -16,7 +14,10 @@ from neuron import settings
 logger = logging.getLogger("server")
 
 class WSProtocol(WebSocketServerProtocol):
-    
+    def __init__(self):
+        self.wasOpen = False
+        return super().__init__()
+
     def onConnect(self, request):
         logger.info("{} connected".format(request.peer))
         # TODO: Authentication here?  Multiple WS protocol?
@@ -29,6 +30,7 @@ class WSProtocol(WebSocketServerProtocol):
         receive messages
         """
         logger.info("WebSocket opened with {}".format(self.peer))
+        self.wasOpen = True
         self.factory.registerClient(self)
 
     def onMessage(self, payload, isBinary):
@@ -40,8 +42,11 @@ class WSProtocol(WebSocketServerProtocol):
                             + " from " + str(self.peer))
 
     def onClose(self, wasClean, code, reason):
-        logger.info("{} disconnected".format(self.peer))
-        self.factory.unregisterClient(self)
+        logger.info("{} disconnected with code {}.".format(self.peer, code)
+                    + ("" if reason is None else " Reason: {}".format(reason)))
+        # Ignore attempted but unopened connections
+        if self.wasOpen:
+            self.factory.unregisterClient(self)
         super().onClose(wasClean, code, reason)
 
 class WSManagerFactory(WebSocketServerFactory):
@@ -62,7 +67,11 @@ class WSManagerFactory(WebSocketServerFactory):
         self.clients[client.peer] = client
 
     def unregisterClient(self, client):
-        self.clients.pop(client.peer)
+        try:
+            self.clients.pop(client.peer)
+        except KeyError:
+            logger.error(
+                "Unregistering a client that was never registered: {}".format(client.peer))
 
     def addSubscription(self, subscriber, event):
         """
@@ -120,7 +129,7 @@ class WSManagerFactory(WebSocketServerFactory):
                     logger.error("Subscriber " + str(subscriber)
                                   + " does not implement the 'notify(event, data, addr)' endpoint")
         except KeyError:
-            logger.warning("Received unrecognized event " + str(event)
+            logger.warning("Received unsubscribed event " + str(event)
                             + " from " + sender.peer)
 
     def constructPayload(event, data):
@@ -143,24 +152,23 @@ class WSManagerFactory(WebSocketServerFactory):
         else:
             logger.error("Client {} disconnected. Message not sent".format(addr))
 
-def run_server(port=8080):
+def run_server(hostname="127.0.0.1", port=8080):
     # Make twisted report logs with python logging module
     twisted_log = log.PythonLoggingObserver(loggerName="server")
     twisted_log.start()
 
-    factory = WSManagerFactory("ws://127.0.0.1:" + str(port))
+    factory = WSManagerFactory()
     factory.protocol = WSProtocol
-    factory.setProtocolOptions(**settings.AUTOBAHN_WEBSOCKET_SETTINGS)
+    factory.setProtocolOptions(**settings.AUTOBAHN_PROTOCOL_OPTIONS)
+    factory.startFactory()
     wsResource = WebSocketResource(factory)
 
-    # Static files should be in the 'components' folder in the same
-    # directory as this file
-    path, _ = os.path.split(os.path.realpath(__file__))
-    root = File(path + "/components")
+    # Set static file location
+    root = File(settings.FRONTEND_DIR)
 
     # Add a path for websocket connection
-    root.putChild(b"ws", wsResource)
+    root.putChild(settings.WS_ROUTE.encode(), wsResource)
 
     site = Site(root)
-    reactor.listenTCP(port, site)
+    reactor.listenTCP(port, site, interface=hostname)
     reactor.run()

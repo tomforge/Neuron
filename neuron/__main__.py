@@ -6,6 +6,7 @@ def main():
     """
     Entry point into the app.
     """
+    # TODO: Handle user provided flags
     if(settings.DEBUG):
         logging.basicConfig(level=logging.DEBUG)
     else:
