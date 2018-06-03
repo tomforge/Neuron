@@ -1,6 +1,5 @@
 import logging
-from neuron import server, settings, factory, protocol
-
+from neuron import server, settings, factory, protocol, utils
 
 def main():
     """
@@ -19,6 +18,8 @@ def main():
     router.setProtocolOptions(**settings.AUTOBAHN_PROTOCOL_OPTIONS)
 
     # TODO: Set up installed plugins
+    plugins = map(utils.getClassInstanceFromPluginString, settings.INSTALLED_PLUGINS)
+
 
     server.run_server(router)
 
