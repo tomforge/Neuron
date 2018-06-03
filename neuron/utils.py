@@ -7,8 +7,7 @@ def parsePluginString(plugin_string):
     moduleName, className = plugin_string.rsplit('.', 1)
     return ("plugins." + moduleName, className)
 
-def getClassInstanceFromPluginString(plugin_string):
+def getClassFromPluginString(plugin_string):
     moduleName, className = parsePluginString(plugin_string)
     mod = importlib.import_module(moduleName)
-    cls = getattr(mod, className)
-    return cls()
+    return getattr(mod, className)
