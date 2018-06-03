@@ -18,7 +18,7 @@ def main():
     router.setProtocolOptions(**settings.AUTOBAHN_PROTOCOL_OPTIONS)
 
     # Initialize plugins
-    plugins = map(utils.getClassInstanceFromPluginString, settings.INSTALLED_PLUGINS)
+    plugins = map(utils.getClassFromPluginString, settings.INSTALLED_PLUGINS)
     for plugin in plugins:
         plugin(router)
 
