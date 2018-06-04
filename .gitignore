@@ -1,0 +1,11 @@
+# Compiled files
+__pycache__/
+
+# IDE files
+*.pyproj
+*.sln
+.vs/
+
+# NPM files
+node_modules/
+package-lock.json
