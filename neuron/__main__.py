@@ -17,10 +17,10 @@ def main():
     router.protocol = protocol.WSProtocol
     router.setProtocolOptions(**settings.AUTOBAHN_PROTOCOL_OPTIONS)
 
-    # Initialize plugins
-    plugins = map(utils.getClassFromPluginString, settings.INSTALLED_PLUGINS)
-    for plugin in plugins:
-        plugin(router)
+    # Initialize modules
+    modules = map(utils.getClassFromModuleString, settings.INSTALLED_MODULES)
+    for module in modules:
+        module(router)
 
     server.run_server(router)
 
