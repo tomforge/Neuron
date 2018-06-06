@@ -9,23 +9,24 @@ class tensorflowClient:
     #       - Constant
     #       - Variable
     #       - Placeholder (for data feed)
-    #       - Graph (some graphs are also nodes if they accept a Tensor as input and
-    #           outputs a tensor, especially grouping wrappers e.g. tf.layers)
-    #               (Note: This is a representation of the dataflow graph, and is
-    #               distinct from tf.Graph)
-    # Graph should stored as a dict of Nodes to a set of other Nodes
-    # Nodes should be stored with type, unique id, and any additional arguments 
+    #       - Compound nodes (essentially subgraphs, e.g. tf.layers)
+    #
+    # - Graph should stored as a dict of Nodes to a set of other Nodes
+    # - Nodes should be stored with type, unique id, and any additional arguments 
     #   required apart from input tensors)
-    # To compress a graph where there are potentially many identical groupings,
-    #   sub-graphs should be defined first, then used as nodes in the final graph
+    # Essentially, every node on UI should correspond to a TF (or self-defined) op
     #
     # Hence the final structure:
-    # Graph:
-    #   Graph.id = int
-    #   Graph.def = {set, Graph}
-    #   Graph.full = {dict, Node : {set, Node} }
-    # Node:
-    #   Node.id = int
-    #   Node.type = string
-    #   Node.args = {dict, string : <any>}
-    pass
+    # <Graph> = {<Node> : {<Node>} }
+    # <Node>:
+    #   Node.id = <int>
+    #   Node.type = <string>
+    #   Node.args = {<string> : <any>}
+    def constructInstSeq(graph):
+        """
+        Construct the sequence of instructions to be executed in order,
+        to construct the actual graph in TF
+        """
+        # Do a topo sort on the Nodes in the graph
+        # Construct the instruction string from the Nodes
+        pass
