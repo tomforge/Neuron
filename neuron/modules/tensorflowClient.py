@@ -7,7 +7,7 @@ class tensorflowClient:
     #   - Nodes
     #       - Operation
     #       (Note: the following 3 are technically Operations that generate Tensors
-    #       e.g. the Op `tf.constant(1)` creates a constant Rensor)
+    #       e.g. the Op `tf.constant(1)` creates a constant Tensor)
     #       - Constant
     #       - Variable
     #       - Placeholder (for data feed)
@@ -34,7 +34,6 @@ class tensorflowClient:
         edges = getEdges(graph)
         topoOrd = getTopoOrd(graph, edges)
         return [constructInstString(graph, node) for node in topoOrd]
-        pass
 
     def getEdges(graph):
         edges = {}
