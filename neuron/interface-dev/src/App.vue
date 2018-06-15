@@ -1,12 +1,26 @@
 <template>
   <div id="app">
+    <Menu msg="menu component here!!!"/>
+
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
     </div>
+
     <router-view/>
+
   </div>
 </template>
+<script>
+import Menu from "./components/Menu.vue"
+
+export default {
+    name: "app",
+    components: {
+        Menu
+    }
+}
+</script>
 
 <style>
 #app {
