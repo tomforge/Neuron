@@ -4,7 +4,7 @@ DEBUG = True
 
 # Now we can construct paths with os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-FRONTEND_DIR = os.path.join(BASE_DIR, "components")
+FRONTEND_DIR = os.path.join(BASE_DIR, "interface")
 
 INSTALLED_MODULES = [
     # TODO: Add modules
