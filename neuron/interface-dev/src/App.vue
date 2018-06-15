@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <Menu msg="menu component here!!!"/>
+
+    <quick-menu :menu-count=count :icon-class=icons :menu-url-list=list></quick-menu>
 
     <div id="nav">
       <router-link to="/">Home</router-link> |
@@ -12,12 +13,25 @@
   </div>
 </template>
 <script>
-import Menu from "./components/Menu.vue"
+import quickMenu from 'vue-quick-menu'
 
 export default {
     name: "app",
+    data() {
+      return {
+        count: 2,
+        icons: [
+          "fa fa-github",
+          './assets/logo'
+        ],
+        list: [
+          {'isLink': true, url:"/"},
+          {'isLink': true, url:"/about"}
+        ]
+      }
+    },
     components: {
-        Menu
+      quickMenu
     }
 }
 </script>
