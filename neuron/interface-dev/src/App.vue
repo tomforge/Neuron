@@ -21,17 +21,15 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-subheader class="mt-3 grey--text text--darken-1">HELLO WORLD</v-subheader>
-		 <v-list-tile v-for="view in views" :key="view.text" @click="">
-			<v-list-tile-content>
-				<router-link :to="view.link" tag="v-list-tile-title" style="cursor:pointer">
-					{{ view.text }}
-				</router-link>
-			</v-list-tile-content>
-        </v-list-tile>
+        <router-link v-for="view in views" :to="view.link" :key="view.text" tag="v-list-tile">
+            <v-list-tile-content>
+                <v-list-tile-title>{{view.text}}</v-list-tile-title>
+            </v-list-tile-content>
+        </router-link>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar
-      color="orange darken-1"
+      color="orange darken-4"
       dense
       fixed
       clipped-left
