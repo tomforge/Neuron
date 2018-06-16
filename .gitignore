@@ -1,5 +1,6 @@
 # Compiled files
 __pycache__/
+*.pyc
 
 # IDE files
 *.pyproj
