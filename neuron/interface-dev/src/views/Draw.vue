@@ -4,12 +4,12 @@
   <v-navigation-drawer v-model="drawer" fixed clipped app permanent stateless>
     <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search"
        single-line append-icon="search" color="white" hide-details
-       v-model="searchStr" @input="filterSearchResults"></v-text-field>
+       v-model="searchStr"></v-text-field>
     <v-list>
-      <template v-for="item in searchRes">
-        <v-list-tile :key="item" @click="">
+      <template v-for="item in filteredNodes">
+        <v-list-tile :key="item" @click="" color="grey lighten-1">
           <v-list-tile-content>
-            <v-list-tile-title>{{item}}</v-list-tile-title>
+            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr)">{{item}}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-divider></v-divider>
@@ -27,8 +27,20 @@ export default {
     return {
       drawer: true,
       searchStr: "",
-      apis: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
-      searchRes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"]
+        nodes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
+    }
+  },
+  computed: {
+    filteredNodes() {
+      if(!this.searchStr) {
+        return this.nodes;
+      } else {
+        return this.nodes.filter(
+          // Return only word-boundary matches (e.g. don't return "add" if
+          // searching for "d")
+          node => (node.search("\\b" + this.searchStr) !== -1)
+        );
+      }
     }
   },
   mounted() {
@@ -45,12 +57,13 @@ export default {
         .attr("cy", document.body.clientHeight / 2)
         .attr("r", 50)
         .style("fill", "#FFFFFF")
-    },
-    filterSearchResults() {
-      this.searchRes = this.apis.filter(this.searchMatch);
-    },
-    searchMatch(str) {
-      return str.search(this.searchStr) !== -1;
+    }
+  },
+  filters: {
+    highlight: function(str, toMatch) {
+      var matcher = new RegExp(toMatch, "i");
+      return str.replace(matcher,
+        matched => ("<span style=\"color:white\">" + matched + "</span>"));
     }
   }
 }

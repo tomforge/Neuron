@@ -2,13 +2,15 @@
 <v-app id="inspire" dark>
 
   <!--HEADER TOOLBAR-->
-  <v-toolbar color="amber darken-4" dense fixed clipped-left app>
-    <v-toolbar-title class="mr-5 align-center">
-      <span class="title">neuron</span>
+  <v-toolbar color="gray darken-4" dense fixed clipped-left app>
+    <v-toolbar-title class="ml-5">
+      <span class="display-1">neuron</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
-      <v-btn v-for="view in mainViews" :to="view.link" :key="view.text" flat> {{view.text}}</v-btn>
+      <v-tabs fixed-tabs color="transparent">
+        <v-tab v-for="view in mainViews" :to="view.link" :key="view.text">{{view.text}}</v-tab>
+      </v-tabs>
     </v-toolbar-items>
     <v-spacer></v-spacer>
     <v-menu bottom left offset-y>
