@@ -1,8 +1,8 @@
 <template>
   <v-layout justify-center align-start>
     <v-flex class="text-xs-center" shrink>
-      <h1 class="display-2">Neuron</h1>
-      <p class="subheading">v1.0.0-alpha</p>
+      <h1 class="display-4">neuron</h1>
+      <p class="headline">v1.0.0-alpha</p>
       <v-btn depressed href="https://github.com/tomforge/neuron" target="_blank">
         <v-icon left large>fa-github</v-icon>
         View on Github

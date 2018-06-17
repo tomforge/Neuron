@@ -2,9 +2,9 @@
 <v-app id="inspire" dark>
 
   <!--HEADER TOOLBAR-->
-  <v-toolbar color="orange darken-4" dense fixed clipped-left app>
+  <v-toolbar color="amber darken-4" dense fixed clipped-left app>
     <v-toolbar-title class="mr-5 align-center">
-      <span class="title">Neuron</span>
+      <span class="title">neuron</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
@@ -44,7 +44,7 @@
 
   <!--MAIN VIEW WINDOW-->
   <v-content>
-    <v-container fill-height>
+    <v-container fluid fill-height>
       <router-view></router-view>
     </v-container>
   </v-content>
