@@ -6,10 +6,10 @@
        single-line append-icon="search" color="white" hide-details
        v-model="searchStr"></v-text-field>
     <v-list>
-      <template v-for="item in filteredNodes">
+      <template v-for="item in filteredNodeTypes">
         <v-list-tile :key="item" @click="" color="grey lighten-1">
           <v-list-tile-content>
-            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr)">{{item}}</v-list-tile-title>
+            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr, 'white')">{{item}}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-divider></v-divider>
@@ -20,32 +20,41 @@
 </div>
 </template>
 <script>
+
 import * as d3 from "d3";
+import { mapState } from "vuex";
+
 export default {
   name: 'Draw',
   data() {
     return {
       drawer: true,
       searchStr: "",
-        nodes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
     }
   },
   computed: {
-    filteredNodes() {
+    // vuex states
+    ...mapState({
+      nodeTypes: "nodeTypes"
+    }),
+
+    filteredNodeTypes() {
       if(!this.searchStr) {
-        return this.nodes;
+        return this.nodeTypes;
       } else {
-        return this.nodes.filter(
+        return this.nodeTypes.filter(
           // Return only word-boundary matches (e.g. don't return "add" if
           // searching for "d")
-          node => (node.search("\\b" + this.searchStr) !== -1)
+          nodeType => (nodeType.search("\\b" + this.searchStr) !== -1)
         );
       }
     }
   },
+
   mounted() {
     this.initBoard();
   },
+
   methods: {
     initBoard() {
       let svg = d3.select("svg").call(d3.zoom().on("zoom", function () {
@@ -59,11 +68,12 @@ export default {
         .style("fill", "#FFFFFF")
     }
   },
+
   filters: {
-    highlight: function(str, toMatch) {
+    highlight: function(str, toMatch, color) {
       var matcher = new RegExp(toMatch, "i");
       return str.replace(matcher,
-        matched => ("<span style=\"color:white\">" + matched + "</span>"));
+        matched => ("<span style=\"color:" + color + "\">" + matched + "</span>"));
     }
   }
 }
