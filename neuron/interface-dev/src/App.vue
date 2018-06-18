@@ -60,19 +60,6 @@ export default {
   data() {
     return {
       drawer: true,
-      items: [{
-          icon: 'home',
-          text: 'Adam\'s'
-        },
-        {
-          icon: 'featured_play_list',
-          text: 'Mad'
-        },
-        {
-          icon: 'work',
-          text: 'Aces'
-        }
-      ],
       mainViews: [{
           link: "/draw",
           text: "DRAW"

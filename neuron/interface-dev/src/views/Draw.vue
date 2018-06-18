@@ -28,12 +28,8 @@ export default {
     return {
       drawer: true,
       graph: "",
-      nodes = [
-
-      ],
-      edges = [
-
-      ],
+      nodes:[],
+      edges: [],
       searchStr: "",
       apis: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
       searchRes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"]
@@ -59,7 +55,7 @@ export default {
     //     name: i + "to" + (i + 1) % numEdges
     //   });
     // };
-    // this.addNodes(this.nodes); 
+    // this.addNodes(this.nodes);
     // this.addEdges(this.edges);
 
     g.setNode("a", {label: "a"});
@@ -86,8 +82,8 @@ export default {
     var initialScale = 0.75;
     svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20).scale(initialScale));
 
-    svg.attr('height', g.graph().height * initialScale + 40);;
-    
+    //svg.attr('height', g.graph().height * initialScale + 40);
+
   },
   methods: {
     initBoard() {
