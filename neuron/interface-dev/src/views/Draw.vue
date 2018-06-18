@@ -28,6 +28,12 @@ export default {
     return {
       drawer: true,
       graph: "",
+      nodes = [
+
+      ],
+      edges = [
+
+      ],
       searchStr: "",
       apis: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
       searchRes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"]
@@ -37,6 +43,24 @@ export default {
     this.initDagreD3Graph();
 
     let g = this.graph;
+
+    /* Doesn't work for me, idk why */
+    // let numNodes = 10,
+    //     numEdges = numNodes;
+    // for (let n = 0; n < numNodes; n++) {
+    //   this.nodes.push({
+    //     name: n
+    //   });
+    // };
+    // for (let e = 0; e < numEdges; e++) {
+    //   this.edges.push({
+    //     from: i,
+    //     to: (i + 1) % numEdges,
+    //     name: i + "to" + (i + 1) % numEdges
+    //   });
+    // };
+    // this.addNodes(this.nodes); 
+    // this.addEdges(this.edges);
 
     g.setNode("a", {label: "a"});
     g.setNode("b", {label: "b"});
@@ -87,6 +111,24 @@ export default {
       this.graph = new dagreD3.graphlib.Graph()
           .setGraph({})
           .setDefaultEdgeLabel(function() { return {}; });
+    },
+    addNode(node) {
+      this.graph.setNode(node.name, {label: node.name});
+    },
+    addEdge(edge) {
+      this.graph.setEdge(edge.from, edge.to, {label: edge.name});
+    },
+    addNodes(nodes) {
+      let self = this;
+      nodes.forEach(function(node) {
+        self.addNode(node);
+      });
+    },
+    addEdges(edges) {
+      let self = this;
+      edges.forEach(function(edge) {
+        self.addEdge(edge);
+      })
     }
   }
 }
