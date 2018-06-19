@@ -12,23 +12,21 @@ function createWebSocketPlugin() {
         ? new MozWebSocket(wsuri)
         : null;
 
-  if (!socket) {
-    console.log("Browser does not support WebSockets!");
-  }
-
   return store => {
-    socket.onopen = msg => store.commit("SOCKET_CONNECT", msg);
-    socket.onclose = msg => store.commit("SOCKET_DISCONNECT", msg);
-    socket.onmessage = msg => store.commit("SOCKET_HANDLE_MESSAGE", msg);
-    // The plugin subscibes only to the "emit" mutation,
-    // to send events to server
-    store.subscribe(mutation => {
-      if (mutation.type === "emit") {
-        socket.send(mutation.wsPayload);
-      }
-    });
-  }
-
+    //TODO: Throw alert when WebSocket is disconnected
+    if (socket) {
+      socket.onopen = () => store.commit("SOCKET_CONNECT");
+      socket.onclose = () => store.commit("SOCKET_DISCONNECT");
+      socket.onmessage = msg => store.commit("SOCKET_HANDLE_MESSAGE", msg);
+      // The plugin subscibes only to the "emit" mutation,
+      // to send events to server
+      store.subscribe(mutation => {
+        if (mutation.type === "emit") {
+          socket.send(mutation.wsPayload);
+        }
+      });
+    }
+  };
 }
 
 const wsPlugin = createWebSocketPlugin();
@@ -51,12 +49,10 @@ export default new Vuex.Store({
   mutations: {
     // SOCKET_ prefixed mutations should be called only
     // by the websocket plugin
-    SOCKET_CONNECT(state, msg) {
-      console.log("WebSocket Connected. " + msg);
+    SOCKET_CONNECT(state) {
       state.wsConnected = true;
     },
-    SOCKET_DISCONNECT(state, msg) {
-      console.log("WebSocket Disconnected. " + msg);
+    SOCKET_DISCONNECT(state) {
       state.wsConnected = false;
     },
     SOCKET_HANDLE_MESSAGE(state, msg) {
