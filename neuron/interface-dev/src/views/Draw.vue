@@ -28,12 +28,8 @@ export default {
     return {
       drawer: true,
       graph: "",
-      nodes: [
-
-      ],
-      edges: [
-
-      ],
+      nodes:[],
+      edges: [],
       searchStr: "",
       apis: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
       searchRes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"]
