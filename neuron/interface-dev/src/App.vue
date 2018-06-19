@@ -46,21 +46,19 @@
 
   <!--MAIN VIEW WINDOW-->
   <v-content>
-    <v-container fluid fill-height>
-      <router-view></router-view>
-    </v-container>
+    <router-view></router-view>
   </v-content>
-
 </v-app>
 </template>
 
 <script>
 export default {
-  name: 'App',
+  name: "App",
   data() {
     return {
       drawer: true,
-      mainViews: [{
+      mainViews: [
+        {
           link: "/draw",
           text: "DRAW"
         },
@@ -71,9 +69,9 @@ export default {
         {
           link: "/visualize",
           text: "VISUALIZE"
-        },
+        }
       ]
-    }
+    };
   }
-}
+};
 </script>

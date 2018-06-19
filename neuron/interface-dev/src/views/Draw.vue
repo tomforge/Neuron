@@ -1,7 +1,7 @@
 <template>
-<div class="draw">
+<v-container fluid fill-height>
   <!-- LEFT DRAWER -->
-  <v-navigation-drawer v-model="drawer" fixed clipped app permanent stateless>
+  <v-navigation-drawer v-model="drawer" clipped app permanent>
     <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
     <v-list>
       <template v-for="item in filteredNodeTypes">
@@ -14,8 +14,8 @@
       </template>
     </v-list>
   </v-navigation-drawer>
-  <svg id="board" width=1280 height=720></svg>
-</div>
+  <svg id="board" style="width: 100%; height: 100%; overflow:visible"></svg>
+</v-container>
 </template>
 <script>
 import * as d3 from "d3";
@@ -80,14 +80,14 @@ export default {
     // g.setEdge("a", "b", {label: "a to b"});
 
     // Create the renderer
-    var render = new dagreD3.render();
+    let render = new dagreD3.render();
 
     // Set up an SVG group so that we can translate the final graph.
-    var svg = d3.select("svg"),
+    let svg = d3.select("svg"),
       svgGroup = svg.append("g");
 
     // Set up zoom support
-    var zoom = d3.zoom().on("zoom", function() {
+    let zoom = d3.zoom().on("zoom", function() {
       svgGroup.attr("transform", d3.event.transform);
     });
     svg.call(zoom);
@@ -115,7 +115,7 @@ export default {
     render(svgGroup, g);
 
     // Center the graph
-    var initialScale = 0.75;
+    let initialScale = 0.75;
     svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20).scale(initialScale));
 
     // svg.attr('height', g.graph().height * initialScale + 40);
@@ -178,7 +178,7 @@ export default {
 
   filters: {
     highlight: function(str, toMatch, color) {
-      var matcher = new RegExp(toMatch, "i");
+      let matcher = new RegExp(toMatch, "i");
       return str.replace(matcher,
         matched => ("<span style=\"color:" + color + "\">" + matched + "</span>"));
     }
