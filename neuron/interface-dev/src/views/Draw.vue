@@ -2,37 +2,54 @@
 <div class="draw">
   <!-- LEFT DRAWER -->
   <v-navigation-drawer v-model="drawer" fixed clipped app permanent stateless>
-    <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search"
-       single-line append-icon="search" color="white" hide-details
-       v-model="searchStr" @input="filterSearchResults"></v-text-field>
+    <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
     <v-list>
-      <template v-for="item in searchRes">
-        <v-list-tile :key="item" @click="">
+      <template v-for="item in filteredNodeTypes">
+        <v-list-tile :key="item" @click="" color="grey lighten-1">
           <v-list-tile-content>
-            <v-list-tile-title>{{item}}</v-list-tile-title>
+            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr, 'white')">{{item}}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-divider></v-divider>
       </template>
     </v-list>
   </v-navigation-drawer>
-    <svg id="board" width=1280 height=720></svg>
+  <svg id="board" width=1280 height=720></svg>
 </div>
 </template>
 <script>
 import * as d3 from "d3";
 import * as dagreD3 from "dagre-d3"
+import {
+  mapState
+} from "vuex";
 export default {
   name: 'Draw',
   data() {
     return {
       drawer: true,
       graph: "",
-      nodes:[],
+      nodes: [],
       edges: [],
       searchStr: "",
-      apis: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"],
-      searchRes: ["adam's", "mad", "aces", "add", "subtract", "mult", "matmul", "dot"]
+    }
+  },
+  computed: {
+    // vuex state
+    ...mapState({
+      nodeTypes: "nodeTypes"
+    }),
+
+    filteredNodeTypes() {
+      if (!this.searchStr) {
+        return this.nodeTypes;
+      } else {
+        return this.nodeTypes.filter(
+          // Return only word-boundary matches (e.g. don't return "add" if
+          // searching for "d")
+          nodeType => (nodeType.search("\\b" + this.searchStr) !== -1)
+        );
+      }
     }
   },
   mounted() {
@@ -42,7 +59,7 @@ export default {
 
     /* Generate array of nodes and edges */
     let numNodes = 10,
-        numEdges = numNodes;
+      numEdges = numNodes;
     for (let n = 0; n < numNodes; n++) {
       this.nodes.push({
         name: n
@@ -55,7 +72,7 @@ export default {
         name: e + " to " + (e + 1) % numEdges
       });
     };
-    this.addNodes(this.nodes); 
+    this.addNodes(this.nodes);
     this.addEdges(this.edges);
 
     // g.setNode("a", {label: "a"});
@@ -67,12 +84,12 @@ export default {
 
     // Set up an SVG group so that we can translate the final graph.
     var svg = d3.select("svg"),
-        svgGroup = svg.append("g");
+      svgGroup = svg.append("g");
 
     // Set up zoom support
     var zoom = d3.zoom().on("zoom", function() {
-          svgGroup.attr("transform", d3.event.transform);
-        });
+      svgGroup.attr("transform", d3.event.transform);
+    });
     svg.call(zoom);
 
     /* This D3 dragging code doesn't seem to work for individual node*/
@@ -102,11 +119,11 @@ export default {
     svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20).scale(initialScale));
 
     // svg.attr('height', g.graph().height * initialScale + 40);
-    
+
   },
   methods: {
     initBoard() {
-      let svg = d3.select("svg").call(d3.zoom().on("zoom", function () {
+      let svg = d3.select("svg").call(d3.zoom().on("zoom", function() {
         svg.attr("transform", d3.event.transform)
       })).append("g")
 
@@ -116,22 +133,18 @@ export default {
         .attr("r", 50)
         .style("fill", "#FFFFFF")
     },
-    filterSearchResults() {
-      this.searchRes = this.apis.filter(this.searchMatch);
-    },
-    searchMatch(str) {
-      return str.search(this.searchStr) !== -1;
-    },
     initDagreD3Graph() {
       this.graph = new dagreD3.graphlib.Graph()
-          .setGraph({
-            nodesep: 30,
-            ranksep: 150,
-            rankdir: "LR",
-            marginx: 20,
-            marginy: 20
-          })
-          .setDefaultEdgeLabel(function() { return {}; });
+        .setGraph({
+          nodesep: 30,
+          ranksep: 150,
+          rankdir: "LR",
+          marginx: 20,
+          marginy: 20
+        })
+        .setDefaultEdgeLabel(function() {
+          return {};
+        });
     },
     addNode(node) {
       this.graph.setNode(node.name, {
@@ -139,7 +152,7 @@ export default {
         label: node.name,
         labelStyle: "fill: #000000",
         style: "fill: #FFFFFF"
-        });
+      });
     },
     addEdge(edge) {
       this.graph.setEdge(edge.from, edge.to, {
@@ -147,7 +160,7 @@ export default {
         labelStyle: "fill: #FFFFFF",
         style: "stroke: #f66; stroke-width: 3px;",
         arrowheadStyle: "fill: #f66"
-        });
+      });
     },
     addNodes(nodes) {
       let self = this;
@@ -160,6 +173,14 @@ export default {
       edges.forEach(function(edge) {
         self.addEdge(edge);
       })
+    }
+  },
+
+  filters: {
+    highlight: function(str, toMatch, color) {
+      var matcher = new RegExp(toMatch, "i");
+      return str.replace(matcher,
+        matched => ("<span style=\"color:" + color + "\">" + matched + "</span>"));
     }
   }
 }
