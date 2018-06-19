@@ -16,7 +16,7 @@
       </template>
     </v-list>
   </v-navigation-drawer>
-    <svg id="board" width=1280 height=720 fill="white"></svg>
+    <svg id="board" width=1280 height=720></svg>
 </div>
 </template>
 <script>
@@ -28,10 +28,10 @@ export default {
     return {
       drawer: true,
       graph: "",
-      nodes = [
+      nodes: [
 
       ],
-      edges = [
+      edges: [
 
       ],
       searchStr: "",
@@ -44,27 +44,27 @@ export default {
 
     let g = this.graph;
 
-    /* Doesn't work for me, idk why */
-    // let numNodes = 10,
-    //     numEdges = numNodes;
-    // for (let n = 0; n < numNodes; n++) {
-    //   this.nodes.push({
-    //     name: n
-    //   });
-    // };
-    // for (let e = 0; e < numEdges; e++) {
-    //   this.edges.push({
-    //     from: i,
-    //     to: (i + 1) % numEdges,
-    //     name: i + "to" + (i + 1) % numEdges
-    //   });
-    // };
-    // this.addNodes(this.nodes); 
-    // this.addEdges(this.edges);
+    /* Generate array of nodes and edges */
+    let numNodes = 10,
+        numEdges = numNodes;
+    for (let n = 0; n < numNodes; n++) {
+      this.nodes.push({
+        name: n
+      });
+    };
+    for (let e = 0; e < numEdges - 1; e++) {
+      this.edges.push({
+        from: e,
+        to: (e + 1) % numEdges,
+        name: e + " to " + (e + 1) % numEdges
+      });
+    };
+    this.addNodes(this.nodes); 
+    this.addEdges(this.edges);
 
-    g.setNode("a", {label: "a"});
-    g.setNode("b", {label: "b"});
-    g.setEdge("a", "b", {label: "a to b"});
+    // g.setNode("a", {label: "a"});
+    // g.setNode("b", {label: "b"});
+    // g.setEdge("a", "b", {label: "a to b"});
 
     // Create the renderer
     var render = new dagreD3.render();
@@ -79,6 +79,25 @@ export default {
         });
     svg.call(zoom);
 
+    /* This D3 dragging code doesn't seem to work for individual node*/
+    // svg.selectAll("circle")
+    //     .call(d3.drag()
+    //         .on("start", dragstarted)
+    //         .on("drag", dragged)
+    //         .on("end", dragended));
+
+    // function dragstarted(d) {
+    //   d3.select(this).raise().classed("active", true);
+    // }
+
+    // function dragged(d) {
+    //   d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+    // }
+
+    // function dragended(d) {
+    //   d3.select(this).classed("active", false);
+    // }
+
     // Run the renderer. This is what draws the final graph.
     render(svgGroup, g);
 
@@ -86,7 +105,7 @@ export default {
     var initialScale = 0.75;
     svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20).scale(initialScale));
 
-    svg.attr('height', g.graph().height * initialScale + 40);;
+    // svg.attr('height', g.graph().height * initialScale + 40);
     
   },
   methods: {
@@ -109,14 +128,30 @@ export default {
     },
     initDagreD3Graph() {
       this.graph = new dagreD3.graphlib.Graph()
-          .setGraph({})
+          .setGraph({
+            nodesep: 30,
+            ranksep: 150,
+            rankdir: "LR",
+            marginx: 20,
+            marginy: 20
+          })
           .setDefaultEdgeLabel(function() { return {}; });
     },
     addNode(node) {
-      this.graph.setNode(node.name, {label: node.name});
+      this.graph.setNode(node.name, {
+        shape: "circle",
+        label: node.name,
+        labelStyle: "fill: #000000",
+        style: "fill: #FFFFFF"
+        });
     },
     addEdge(edge) {
-      this.graph.setEdge(edge.from, edge.to, {label: edge.name});
+      this.graph.setEdge(edge.from, edge.to, {
+        label: edge.name,
+        labelStyle: "fill: #FFFFFF",
+        style: "stroke: #f66; stroke-width: 3px;",
+        arrowheadStyle: "fill: #f66"
+        });
     },
     addNodes(nodes) {
       let self = this;
