@@ -1,6 +1,7 @@
 from collections import deque
+from neuron.modules import BaseModule
 
-class tensorflowClient:
+class tensorflowClient(BaseModule):
     # Data structure:
     #   - Edges
     #       - Tensor (don't need to store explicitly)
@@ -14,7 +15,7 @@ class tensorflowClient:
     #       - Compound nodes (essentially subgraphs, e.g. tf.layers)
     #
     # - Graph should stored as a dict of Nodes to a set of other Nodes
-    # - Nodes should be stored with type, unique id, and any additional arguments 
+    # - Nodes should be stored with type, unique id, and any additional arguments
     #   required apart from input tensors)
     # Essentially, every node on UI should correspond to a TF (or self-defined) op
     #
@@ -25,6 +26,17 @@ class tensorflowClient:
     #   Node.type = <string>
     #   Node.parents = [<int>] (parent node ids, stored in argument order - important for ops like '>=')
     #   Node.args = {<string> : <any>}
+    apiList = [
+      "ADAMS",
+      "MAD",
+      "ACES",
+      "add",
+      "subtract",
+      "mult",
+      "matmul",
+      "dot",
+      "conv"
+    ]
 
     def constructInstSeq(graph):
         """
@@ -45,7 +57,7 @@ class tensorflowClient:
                     edges[nodeId] = {id}
 
         return edges
-    
+
     def getTopoOrd(graph, edges):
         inDegrees = {}
         queue = deque()
@@ -64,9 +76,13 @@ class tensorflowClient:
                     queue.append(graph[childId])
         return topoOrd
 
-        
+
     def constructInstString(graph, node):
         str = node.type + "("
         parentStr = ",".join([graph[id] for id in node.parents])
         argString = ",".join("{}:{}".format(param, args) for param,args in node.args)
         return ",".join([str, parentStr, argString])
+
+    def API_get_node_meta():
+        res = [{idx : val} for (idx, val) in enumerate(apiList)]
+        self.emit("RES_get_node_meta", res)
