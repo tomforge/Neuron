@@ -1,5 +1,6 @@
 # Compiled files
 __pycache__/
+*.pyc
 
 # IDE files
 *.pyproj
@@ -8,4 +9,3 @@ __pycache__/
 
 # NPM files
 node_modules/
-package-lock.json
