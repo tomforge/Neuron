@@ -7,12 +7,25 @@ class BaseModule(abc.ABC):
     """
     def __init__(self, router):
         self.router = router
-
-    def emit(self, eventType, data):
-        self.router.triggerEvent(eventType, data)
+        self.startup()
 
     @abc.abstractmethod
-    def receive(self, eventType, data):
-        """ Modules must implement their own receive()
+    def startup(self):
+        """ Modules must implement the startup() method, for any initialization
+        when starting up """
+        pass
+
+    @abc.abstractmethod
+    def shutdown(self):
+        """ Modules must implement the shutdown() method, for any cleaning
+        up when shutting down """
+        pass
+
+    @abc.abstractmethod
+    def notify(self, eventType, data, sender):
+        """ Modules must implement their own notify()
         method """
         pass
+
+    def emit(self, eventType, data, addr=None):
+        self.router.triggerEvent(eventType, data, addr)

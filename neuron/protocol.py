@@ -27,7 +27,7 @@ class WSProtocol(WebSocketServerProtocol):
     def onMessage(self, payload, isBinary):
         try:
             event, data = json.loads(payload.decode('utf8'))
-            self.factory.dispatch(event, data, self)
+            self.factory.dispatchToSubscribers(event, data, self)
         except (json.JSONDecodeError, ValueError):
             logger.warning("Received invalid message " + str(payload)
                             + " from " + str(self.peer))

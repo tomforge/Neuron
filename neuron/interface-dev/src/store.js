@@ -35,16 +35,7 @@ export default new Vuex.Store({
   state: {
     wsConnected: false,
     wsPayload: "",
-    nodeTypes: [
-      "adam's",
-      "mad",
-      "aces",
-      "add",
-      "subtract",
-      "mult",
-      "matmul",
-      "dot"
-    ]
+    nodeTypes: []
   },
   mutations: {
     // SOCKET_ prefixed mutations should be called only
@@ -56,7 +47,10 @@ export default new Vuex.Store({
       state.wsConnected = false;
     },
     SOCKET_HANDLE_MESSAGE(state, msg) {
-      // handle message here
+      let [eventType, data] = msg;
+      if (eventType === "RES_get_node_meta") {
+        state.nodeTypes = data;
+      }
     },
     emit(state, evt, data) {
       state.wsPayload = JSON.stringify([evt, data]);

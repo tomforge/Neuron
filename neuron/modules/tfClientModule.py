@@ -1,7 +1,10 @@
 from collections import deque
-from neuron.modules import BaseModule
+from neuron.modules.baseModule import BaseModule
+import tensorflow as tf
+import logging
+logger = logging.getLogger("TFClientModule")
 
-class tensorflowClient(BaseModule):
+class TFClientModule(BaseModule):
     # Data structure:
     #   - Edges
     #       - Tensor (don't need to store explicitly)
@@ -26,19 +29,21 @@ class tensorflowClient(BaseModule):
     #   Node.type = <string>
     #   Node.parents = [<int>] (parent node ids, stored in argument order - important for ops like '>=')
     #   Node.args = {<string> : <any>}
-    apiList = [
-      "ADAMS",
-      "MAD",
-      "ACES",
-      "add",
-      "subtract",
-      "mult",
-      "matmul",
-      "dot",
-      "conv"
-    ]
 
-    def constructInstSeq(graph):
+    def startup(self):
+        self.nodeList = [tf.layers.conv2d, tf.layers.dense, tf.layers.max_pooling2d, tf.layers.dropout]
+        self.router.addSubscription(self, "API_get_node_meta")
+        logger.debug("Started up")
+
+    def shutdown(self):
+        pass
+
+    def notify(self, eventType, data, sender):
+        logger.debug("Received event: " + eventType + " from " + sender)
+        if eventType == "API_get_node_meta":
+            self.API_get_node_meta(sender)
+
+    def constructInstSeq(self, graph):
         """
         Construct the sequence of instructions to be executed in order,
         to construct the actual graph in TF
@@ -47,7 +52,7 @@ class tensorflowClient(BaseModule):
         topoOrd = getTopoOrd(graph, edges)
         return [constructInstString(graph, node) for node in topoOrd]
 
-    def getEdges(graph):
+    def getEdges(self, graph):
         edges = {}
         for id, node in graph.items():
             for nodeId in node.parents:
@@ -58,7 +63,7 @@ class tensorflowClient(BaseModule):
 
         return edges
 
-    def getTopoOrd(graph, edges):
+    def getTopoOrd(self, graph, edges):
         inDegrees = {}
         queue = deque()
         topoOrd = []
@@ -77,12 +82,22 @@ class tensorflowClient(BaseModule):
         return topoOrd
 
 
-    def constructInstString(graph, node):
+    def constructInstString(self, graph, node):
         str = node.type + "("
         parentStr = ",".join([graph[id] for id in node.parents])
         argString = ",".join("{}:{}".format(param, args) for param,args in node.args)
         return ",".join([str, parentStr, argString])
 
-    def API_get_node_meta():
-        res = [{idx : val} for (idx, val) in enumerate(apiList)]
-        self.emit("RES_get_node_meta", res)
+    def API_get_node_meta(self, sender):
+        """ Prepare a representation of the internal nodeList array for
+        sending to clients"""
+        res = []
+        for idx, func in enumerate(self.nodeList):
+            node = {
+                "id": idx,
+                "name": func.__name__,
+                "doc": func.__doc__
+            }
+            res.append(node)
+        logger.debug("OK")
+        self.emit("RES_get_node_meta", res, sender)

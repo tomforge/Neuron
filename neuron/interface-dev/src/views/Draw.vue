@@ -5,9 +5,9 @@
     <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
     <v-list>
       <template v-for="item in filteredNodeTypes">
-        <v-list-tile :key="item" @click="" color="grey lighten-1">
+        <v-list-tile :key="item.id" @click="" color="grey lighten-1">
           <v-list-tile-content>
-            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr, 'white')">{{item}}</v-list-tile-title>
+            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr, 'white')">{{item.name}}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-divider></v-divider>
@@ -37,7 +37,8 @@ export default {
   computed: {
     // vuex state
     ...mapState({
-      nodeTypes: "nodeTypes"
+      nodeTypes: "nodeTypes",
+      wsConnected: "wsConnected"
     }),
 
     filteredNodeTypes() {
@@ -47,12 +48,14 @@ export default {
         return this.nodeTypes.filter(
           // Return only word-boundary matches (e.g. don't return "add" if
           // searching for "d")
-          nodeType => (nodeType.search("\\b" + this.searchStr) !== -1)
+          nodeType => (nodeType.name.search("\\b" + this.searchStr) !== -1)
         );
       }
     }
   },
   mounted() {
+    this.$store.commit("emit", "API_get_node_meta", "")
+
     this.initDagreD3Graph();
 
     let g = this.graph;
@@ -122,6 +125,14 @@ export default {
 
   },
   methods: {
+    wait(time) {
+      // return new Promise((resolve, reject));
+    }
+    async function populateNodeList() {
+      if(!this.nodeTypes.length) {
+
+      }
+    }
     initBoard() {
       let svg = d3.select("svg").call(d3.zoom().on("zoom", function() {
         svg.attr("transform", d3.event.transform)
