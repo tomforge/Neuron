@@ -5,11 +5,23 @@
     <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
     <v-list>
       <template v-for="item in filteredNodeTypes">
-        <v-list-tile :key="item.id" @click="" color="grey lighten-1">
-          <v-list-tile-content>
-            <v-list-tile-title v-html="$options.filters.highlight(item, searchStr, 'white')">{{item.name}}</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+        <v-tooltip :key="item.id" right>
+            <v-list-tile slot="activator" @click="" color="grey lighten-1">
+              <v-list-tile-content>
+                <v-list-tile-title v-html="$options.filters.highlight(item.name, searchStr, 'white')">{{item.name}}</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <!--Doc viewer-->
+            <v-card flat>
+              <v-card-title>
+                <span class="headline">{{item.name}}</span>
+              </v-card-title>
+              <v-card-text>
+                  <!--TODO: better formatting for docs-->
+                  <pre>{{item.doc}}</pre>
+              </v-card-text>
+            </v-card>
+        </v-tooltip>
         <v-divider></v-divider>
       </template>
     </v-list>
@@ -19,20 +31,18 @@
 </template>
 <script>
 import * as d3 from "d3";
-import * as dagreD3 from "dagre-d3"
-import {
-  mapState
-} from "vuex";
+import * as dagreD3 from "dagre-d3";
+import { mapState } from "vuex";
 export default {
-  name: 'Draw',
+  name: "Draw",
   data() {
     return {
       drawer: true,
       graph: "",
       nodes: [],
       edges: [],
-      searchStr: "",
-    }
+      searchStr: ""
+    };
   },
   computed: {
     // vuex state
@@ -48,13 +58,14 @@ export default {
         return this.nodeTypes.filter(
           // Return only word-boundary matches (e.g. don't return "add" if
           // searching for "d")
-          nodeType => (nodeType.name.search("\\b" + this.searchStr) !== -1)
+          nodeType => nodeType.name.search("\\b" + this.searchStr) !== -1
         );
       }
     }
   },
   mounted() {
-    this.$store.commit("emit", "API_get_node_meta", "")
+    // TODO: Don't request if already stored
+    this.$store.commit("emit", ["API_get_node_meta", ""]);
 
     this.initDagreD3Graph();
 
@@ -67,14 +78,14 @@ export default {
       this.nodes.push({
         name: n
       });
-    };
+    }
     for (let e = 0; e < numEdges - 1; e++) {
       this.edges.push({
         from: e,
         to: (e + 1) % numEdges,
-        name: e + " to " + (e + 1) % numEdges
+        name: e + " to " + ((e + 1) % numEdges)
       });
-    };
+    }
     this.addNodes(this.nodes);
     this.addEdges(this.edges);
 
@@ -119,30 +130,32 @@ export default {
 
     // Center the graph
     let initialScale = 0.75;
-    svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20).scale(initialScale));
+    svg.call(
+      zoom.transform,
+      d3.zoomIdentity
+        .translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20)
+        .scale(initialScale)
+    );
 
     // svg.attr('height', g.graph().height * initialScale + 40);
-
   },
   methods: {
-    wait(time) {
-      // return new Promise((resolve, reject));
-    }
-    async function populateNodeList() {
-      if(!this.nodeTypes.length) {
-
-      }
-    }
     initBoard() {
-      let svg = d3.select("svg").call(d3.zoom().on("zoom", function() {
-        svg.attr("transform", d3.event.transform)
-      })).append("g")
+      let svg = d3
+        .select("svg")
+        .call(
+          d3.zoom().on("zoom", function() {
+            svg.attr("transform", d3.event.transform);
+          })
+        )
+        .append("g");
 
-      svg.append("circle")
+      svg
+        .append("circle")
         .attr("cx", document.body.clientWidth / 2)
         .attr("cy", document.body.clientHeight / 2)
         .attr("r", 50)
-        .style("fill", "#FFFFFF")
+        .style("fill", "#FFFFFF");
     },
     initDagreD3Graph() {
       this.graph = new dagreD3.graphlib.Graph()
@@ -183,16 +196,18 @@ export default {
       let self = this;
       edges.forEach(function(edge) {
         self.addEdge(edge);
-      })
+      });
     }
   },
 
   filters: {
     highlight: function(str, toMatch, color) {
       let matcher = new RegExp(toMatch, "i");
-      return str.replace(matcher,
-        matched => ("<span style=\"color:" + color + "\">" + matched + "</span>"));
+      return str.replace(
+        matcher,
+        matched => '<span style="color:' + color + '">' + matched + "</span>"
+      );
     }
   }
-}
+};
 </script>

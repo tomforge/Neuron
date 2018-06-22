@@ -17,12 +17,20 @@ function createWebSocketPlugin() {
     if (socket) {
       socket.onopen = () => store.commit("SOCKET_CONNECT");
       socket.onclose = () => store.commit("SOCKET_DISCONNECT");
-      socket.onmessage = msg => store.commit("SOCKET_HANDLE_MESSAGE", msg);
-      // The plugin subscibes only to the "emit" mutation,
+      socket.onmessage = evt =>
+        store.commit("SOCKET_HANDLE_MESSAGE", JSON.parse(evt.data));
+      // The plugin subscribes only to the "emit" mutation,
       // to send events to server
       store.subscribe(mutation => {
         if (mutation.type === "emit") {
-          socket.send(mutation.wsPayload);
+          let jsonPayload = JSON.stringify(mutation.payload);
+          // If not ready, wait 500ms before trying again. Only tries once more, if
+          // connection is still not up, this message will be lost
+          if (!socket.readyState) {
+            setTimeout(() => socket.send(jsonPayload), 500);
+          } else {
+            socket.send(jsonPayload);
+          }
         }
       });
     }
@@ -39,7 +47,7 @@ export default new Vuex.Store({
   },
   mutations: {
     // SOCKET_ prefixed mutations should be called only
-    // by the websocket plugin
+    // by the WebsScket plugin
     SOCKET_CONNECT(state) {
       state.wsConnected = true;
     },
@@ -52,9 +60,7 @@ export default new Vuex.Store({
         state.nodeTypes = data;
       }
     },
-    emit(state, evt, data) {
-      state.wsPayload = JSON.stringify([evt, data]);
-    }
+    emit(state, evt) {}
   },
   actions: {},
   plugins: [wsPlugin]
