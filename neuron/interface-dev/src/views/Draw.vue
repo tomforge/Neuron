@@ -5,7 +5,7 @@
     <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
     <v-list>
       <template v-for="item in filteredNodeTypes">
-        <v-tooltip :key="item.id" right>
+        <v-menu :key="item.id" open-on-hover right offset-x full-width :close-on-content-click="false">
             <v-list-tile slot="activator" @click="" color="grey lighten-1">
               <v-list-tile-content>
                 <v-list-tile-title v-html="$options.filters.highlight(item.name, searchStr, 'white')">{{item.name}}</v-list-tile-title>
@@ -21,7 +21,7 @@
                   <pre>{{item.doc}}</pre>
               </v-card-text>
             </v-card>
-        </v-tooltip>
+        </v-menu>
         <v-divider></v-divider>
       </template>
     </v-list>
