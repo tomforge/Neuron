@@ -1,38 +1,71 @@
 <template>
 <v-container fluid fill-height>
   <!-- LEFT DRAWER -->
-  <v-navigation-drawer v-model="drawer" clipped app permanent>
-    <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
-    <v-list>
-      <template v-for="item in filteredNodeTypes">
-        <v-menu :key="item.id" open-on-hover right offset-x full-width :close-on-content-click="false">
+  <v-navigation-drawer v-model="drawer" class="pa-0" clipped app permanent>
+    <v-layout column fill-height>
+      <v-flex xs1>
+        Put some tabs here
+      </v-flex>
+      <v-flex>
+        <!-- Search bar -->
+        <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
+        <!-- Node list -->
+        <v-list>
+          <template v-for="item in filteredNodeTypes">
+          <v-menu :key="item.id" open-on-hover right offset-x full-width :close-on-content-click="false">
+            <!-- Node list item -->
             <v-list-tile slot="activator" @click="" color="grey lighten-1">
               <v-list-tile-content>
                 <v-list-tile-title v-html="$options.filters.highlight(item.name, searchStr, 'white')">{{item.name}}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <!--Doc viewer-->
-            <v-card flat>
+            <!--Doc viewer popup-->
+            <v-card id="docs-display" flat color="grey darken-2" height="500px">
               <v-card-title>
                 <span class="headline">{{item.name}}</span>
               </v-card-title>
               <v-card-text>
-                  <!--TODO: better formatting for docs-->
-                  <pre>{{item.doc}}</pre>
+                <!--TODO: better formatting for docs-->
+                <pre>{{item.doc}}</pre>
               </v-card-text>
             </v-card>
-        </v-menu>
-        <v-divider></v-divider>
-      </template>
-    </v-list>
+          </v-menu>
+          <v-divider></v-divider>
+          </template>
+        </v-list>
+      </v-flex>
+      <!-- Attributes panel -->
+      <v-flex xs4>
+        <v-card height="100%" tile>
+          <v-card-title class="justify-center subheading pa-1">
+            <b>Selection:</b>&nbsp &lt Some Node type &gt
+          </v-card-title>
+          <v-divider></v-divider>
+
+          lorem ipsum dolor sit amet
+        </v-card>
+      </v-flex>
+    </v-layout>
   </v-navigation-drawer>
+  <!-- MAIN BOARD -->
   <svg id="board" style="width: 100%; height: 100%; overflow:visible"></svg>
 </v-container>
 </template>
+
+<style scoped>
+/* Add scrollbar for docs display if necessary */
+
+#docs-display {
+  overflow: auto;
+}
+</style>
+
 <script>
 import * as d3 from "d3";
 import * as dagreD3 from "dagre-d3";
-import { mapState } from "vuex";
+import {
+  mapState
+} from "vuex";
 export default {
   name: "Draw",
   data() {
@@ -64,8 +97,9 @@ export default {
     }
   },
   mounted() {
-    // TODO: Don't request if already stored
-    this.$store.commit("emit", ["API_get_node_meta", ""]);
+    if (!this.nodeTypes.length) {
+      this.$store.commit("emit", ["API_get_node_meta", ""]);
+    }
 
     this.initDagreD3Graph();
 
@@ -133,30 +167,13 @@ export default {
     svg.call(
       zoom.transform,
       d3.zoomIdentity
-        .translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20)
-        .scale(initialScale)
+      .translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20)
+      .scale(initialScale)
     );
 
     // svg.attr('height', g.graph().height * initialScale + 40);
   },
   methods: {
-    initBoard() {
-      let svg = d3
-        .select("svg")
-        .call(
-          d3.zoom().on("zoom", function() {
-            svg.attr("transform", d3.event.transform);
-          })
-        )
-        .append("g");
-
-      svg
-        .append("circle")
-        .attr("cx", document.body.clientWidth / 2)
-        .attr("cy", document.body.clientHeight / 2)
-        .attr("r", 50)
-        .style("fill", "#FFFFFF");
-    },
     initDagreD3Graph() {
       this.graph = new dagreD3.graphlib.Graph()
         .setGraph({

@@ -43,7 +43,7 @@ export default new Vuex.Store({
   state: {
     wsConnected: false,
     wsPayload: "",
-    nodeTypes: []
+    nodeTypes: [{"id":0, "name":"test1", "doc":"lorem ipsum dolor sit amet"}]
   },
   mutations: {
     // SOCKET_ prefixed mutations should be called only
