@@ -36,13 +36,23 @@
       </v-flex>
       <!-- Attributes panel -->
       <v-flex xs4>
-        <v-card height="100%" tile>
+        <v-card height="100%" class="elevation-5">
           <v-card-title class="justify-center subheading pa-1">
-            <b>Selection:</b>&nbsp &lt Some Node type &gt
+            <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{selectedNode.name}}</em>
           </v-card-title>
-          <v-divider></v-divider>
-
-          lorem ipsum dolor sit amet
+          <!-- <v-divider></v-divider> -->
+          <v-data-table :items="selectedNode.attr"
+            hide-actions hide-headers>
+            <template slot="items" slot-scope="props">
+              <th class="text-xs-left"> {{props.item.name}}: </th>
+              <td class="text-xs-center" width="100%">
+                <v-edit-dialog :return-value.sync="props.item.value" lazy>
+                  {{props.item.value}}
+                  <v-text-field slot="input" v-model="props.item.value" label="Edit" single-line></v-text-field>
+                </v-edit-dialog>
+             </td>
+            </template>
+          </v-data-table>
         </v-card>
       </v-flex>
     </v-layout>
@@ -74,7 +84,13 @@ export default {
       graph: "",
       nodes: [],
       edges: [],
-      searchStr: ""
+      searchStr: "",
+      selectedNode: {
+        "name": "Adam's Mad Aces",
+        "attr": [{"name": "name", "value":"lorem"},
+                {"name": "filters", "value":"3"},
+                {"name": "ipsum", "value":"dolor"}]
+      },
     };
   },
   computed: {
