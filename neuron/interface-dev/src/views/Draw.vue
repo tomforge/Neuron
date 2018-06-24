@@ -1,7 +1,7 @@
 <template>
 <v-container fluid fill-height>
   <!-- LEFT DRAWER -->
-  <v-navigation-drawer v-model="drawer" class="pa-0" clipped app permanent>
+  <v-navigation-drawer v-model="drawer" class="pa-0 noscroll" clipped app permanent>
     <v-layout column fill-height>
       <v-flex xs1>
         Put some tabs here
@@ -12,7 +12,14 @@
         <!-- Node list -->
         <v-list>
           <template v-for="item in filteredNodeTypes">
-          <v-menu :key="item.id" open-on-hover right offset-x full-width :close-on-content-click="false">
+          <v-menu :key="item.id"
+            open-on-hover
+            open-delay="200"
+            close-delay="0"
+            right
+            offset-x
+            full-width
+            :close-on-content-click="false">
             <!-- Node list item -->
             <v-list-tile slot="activator" @click="" color="grey lighten-1">
               <v-list-tile-content>
@@ -20,7 +27,7 @@
               </v-list-tile-content>
             </v-list-tile>
             <!--Doc viewer popup-->
-            <v-card id="docs-display" flat color="grey darken-2" height="500px">
+            <v-card class="scroll" flat color="grey darken-2" height="500px">
               <v-card-title>
                 <span class="headline">{{item.name}}</span>
               </v-card-title>
@@ -34,25 +41,41 @@
           </template>
         </v-list>
       </v-flex>
+
+      <v-spacer></v-spacer>
+
       <!-- Attributes panel -->
-      <v-flex xs4>
-        <v-card height="100%" class="elevation-5">
-          <v-card-title class="justify-center subheading pa-1">
-            <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{selectedNode.name}}</em>
-          </v-card-title>
-          <!-- <v-divider></v-divider> -->
-          <v-data-table :items="selectedNode.attr"
-            hide-actions hide-headers>
-            <template slot="items" slot-scope="props">
-              <th class="text-xs-left"> {{props.item.name}}: </th>
-              <td class="text-xs-center" width="100%">
-                <v-edit-dialog :return-value.sync="props.item.value" lazy>
-                  {{props.item.value}}
-                  <v-text-field slot="input" v-model="props.item.value" label="Edit" single-line></v-text-field>
-                </v-edit-dialog>
-             </td>
-            </template>
-          </v-data-table>
+      <v-flex style="min-height:0" xs4>
+        <v-card height="100%" class="elevation-5 grey--text text--lighten-2" color="grey darken-4">
+          <v-layout column fill-height>
+            <!-- Selection title -->
+            <v-flex>
+              <v-card-title class="justify-center subheading pa-1">
+                <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{selectedNode.name}}</em>
+              </v-card-title>
+              <v-divider></v-divider>
+            </v-flex>
+            <!-- Attributes list -->
+            <v-flex class="scroll">
+              <v-data-table :items="selectedNode.attr" hide-actions hide-headers>
+                <template slot="items" slot-scope="props">
+                  <tr id="attr-row">
+                    <!-- Attribute name -->
+                    <th class="text-xs-center"> {{props.item.name}} </th>
+                    <!-- Attribute value -->
+                    <td width="100%">
+                      <v-edit-dialog :return-value.sync="props.item.value" lazy>
+                        <!-- Value display -->
+                        <span class="text-xs-center">{{props.item.value}}</span>
+                        <!-- Value edit display -->
+                        <v-text-field slot="input" v-model="props.item.value" label="Edit" single-line></v-text-field>
+                      </v-edit-dialog>
+                   </td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-flex>
+          </v-layout>
         </v-card>
       </v-flex>
     </v-layout>
@@ -63,10 +86,27 @@
 </template>
 
 <style scoped>
-/* Add scrollbar for docs display if necessary */
+.noscroll {
+  overflow: hidden;
+}
 
-#docs-display {
+.scroll {
   overflow: auto;
+}
+
+/* No inbuilt way to change data-table color, so override bg-color manually.
+Set to grey darken-4 */
+
+#attr-row {
+  background-color: #212121;
+  color: #E0E0E0;
+}
+
+/* Hover color is lost when bg-color is manually set. Need to enable it
+manually as well. Set to grey darken-3 */
+
+#attr-row:hover {
+  background-color: #424242;
 }
 </style>
 
@@ -87,9 +127,39 @@ export default {
       searchStr: "",
       selectedNode: {
         "name": "Adam's Mad Aces",
-        "attr": [{"name": "name", "value":"lorem"},
-                {"name": "filters", "value":"3"},
-                {"name": "ipsum", "value":"dolor"}]
+        "attr": [{
+            "name": "Name",
+            "value": "lorem"
+          },
+          {
+            "name": "Filters",
+            "value": "3"
+          },
+          {
+            "name": "Activity Regularizer",
+            "value": "dolor"
+          },
+          {
+            "name": "kernel regularizer",
+            "value": "sit"
+          },
+          {
+            "name": "kernel initializer",
+            "value": "amet"
+          },
+          {
+            "name": "bias constraint",
+            "value": "consectectur"
+          },
+          {
+            "name": "trainable",
+            "value": "true"
+          },
+          {
+            "name": "data format",
+            "value": "hello"
+          }
+        ]
       },
     };
   },
