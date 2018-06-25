@@ -1,88 +1,102 @@
 <template>
-<v-container fluid fill-height>
-  <!-- LEFT DRAWER -->
-  <v-navigation-drawer v-model="drawer" class="pa-0 noscroll" clipped app permanent>
-    <v-layout column fill-height>
-      <v-flex xs1>
-        Put some tabs here
-      </v-flex>
-      <v-flex>
-        <!-- Search bar -->
-        <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line append-icon="search" color="white" hide-details v-model="searchStr"></v-text-field>
-        <!-- Node list -->
-        <v-list>
-          <template v-for="item in filteredNodeTypes">
-          <v-menu :key="item.id"
-            open-on-hover
-            open-delay="200"
-            close-delay="0"
-            right
-            offset-x
-            full-width
-            :close-on-content-click="false">
-            <!-- Node list item -->
-            <v-list-tile slot="activator" @click="" color="grey lighten-1">
-              <v-list-tile-content>
-                <v-list-tile-title v-html="$options.filters.highlight(item.name, searchStr, 'white')">{{item.name}}</v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-            <!--Doc viewer popup-->
-            <v-card class="scroll" flat color="grey darken-2" height="500px">
-              <v-card-title>
-                <span class="headline">{{item.name}}</span>
-              </v-card-title>
-              <v-card-text>
-                <!--TODO: better formatting for docs-->
-                <pre>{{item.doc}}</pre>
-              </v-card-text>
-            </v-card>
-          </v-menu>
-          <v-divider></v-divider>
-          </template>
-        </v-list>
-      </v-flex>
+    <v-container fluid fill-height>
+        <!-- LEFT DRAWER -->
+        <v-navigation-drawer v-model="drawer" class="pa-0 noscroll" clipped app permanent>
+            <v-layout column fill-height>
+                <v-flex xs1>
+                    Put some tabs here
+                </v-flex>
+                <v-flex style="min-height:0" xs7>
+                    <v-card height="100%" class="elevation-5">
+                        <v-layout column fill-height>
+                            <v-flex class="shrink">
+                                <!-- Search bar -->
+                                <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line
+                                              append-icon="search" color="white" hide-details
+                                              v-model="searchStr"></v-text-field>
+                            </v-flex>
+                            <!-- Node list -->
+                            <v-flex class="scroll">
+                                <v-list>
+                                    <template v-for="item in filteredNodeTypes">
+                                        <v-menu :key="item.id"
+                                                open-on-hover
+                                                open-delay="200"
+                                                close-delay="0"
+                                                right
+                                                offset-x
+                                                full-width
+                                                :close-on-content-click="false">
+                                            <!-- Node list item -->
+                                            <v-list-tile slot="activator" @click="" color="grey lighten-1">
+                                                <v-list-tile-content>
+                                                    <v-list-tile-title
+                                                            v-html="$options.filters.highlight(item.name, searchStr, 'white')">
+                                                        {{item.name}}
+                                                    </v-list-tile-title>
+                                                </v-list-tile-content>
+                                            </v-list-tile>
+                                            <!--Doc viewer popup-->
+                                            <v-card class="scroll" flat color="grey darken-2" height="500px">
+                                                <v-card-title>
+                                                    <span class="headline">{{item.name}}</span>
+                                                </v-card-title>
+                                                <v-card-text>
+                                                    <!--TODO: better formatting for docs-->
+                                                    <pre>{{item.doc}}</pre>
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-menu>
+                                        <v-divider></v-divider>
+                                    </template>
+                                </v-list>
+                            </v-flex>
+                        </v-layout>
+                    </v-card>
+                </v-flex>
 
-      <v-spacer></v-spacer>
+                <v-spacer></v-spacer>
 
-      <!-- Attributes panel -->
-      <v-flex style="min-height:0" xs4>
-        <v-card height="100%" class="elevation-5 grey--text text--lighten-2" color="grey darken-4">
-          <v-layout column fill-height>
-            <!-- Selection title -->
-            <v-flex>
-              <v-card-title class="justify-center subheading pa-1">
-                <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{selectedNode.name}}</em>
-              </v-card-title>
-              <v-divider></v-divider>
-            </v-flex>
-            <!-- Attributes list -->
-            <v-flex class="scroll">
-              <v-data-table :items="selectedNode.attr" hide-actions hide-headers>
-                <template slot="items" slot-scope="props">
-                  <tr id="attr-row">
-                    <!-- Attribute name -->
-                    <th class="text-xs-center"> {{props.item.name}} </th>
-                    <!-- Attribute value -->
-                    <td width="100%">
-                      <v-edit-dialog :return-value.sync="props.item.value" lazy>
-                        <!-- Value display -->
-                        <span class="text-xs-center">{{props.item.value}}</span>
-                        <!-- Value edit display -->
-                        <v-text-field slot="input" v-model="props.item.value" label="Edit" single-line></v-text-field>
-                      </v-edit-dialog>
-                   </td>
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-flex>
-          </v-layout>
-        </v-card>
-      </v-flex>
-    </v-layout>
-  </v-navigation-drawer>
-  <!-- MAIN BOARD -->
-  <svg id="board" style="width: 100%; height: 100%; overflow:visible"></svg>
-</v-container>
+                <!-- Attributes panel -->
+                <v-flex style="min-height:0" xs4>
+                    <v-card height="100%" class="elevation-5 grey--text text--lighten-2" color="grey darken-4">
+                        <v-layout column fill-height>
+                            <!-- Selection title -->
+                            <v-flex class="shrink">
+                                <v-card-title class="justify-center subheading pa-1">
+                                    <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{selectedNode.name}}</em>
+                                </v-card-title>
+                                <v-divider></v-divider>
+                            </v-flex>
+                            <!-- Attributes list -->
+                            <v-flex class="scroll">
+                                <v-data-table :items="selectedNode.attr" hide-actions hide-headers>
+                                    <template slot="items" slot-scope="props">
+                                        <tr id="attr-row">
+                                            <!-- Attribute name -->
+                                            <th class="text-xs-center"> {{props.item.name}}</th>
+                                            <!-- Attribute value -->
+                                            <td width="100%">
+                                                <v-edit-dialog :return-value.sync="props.item.value" lazy>
+                                                    <!-- Value display -->
+                                                    <span class="text-xs-center">{{props.item.value}}</span>
+                                                    <!-- Value edit display -->
+                                                    <v-text-field slot="input" v-model="props.item.value"
+                                                                  label="Edit" single-line></v-text-field>
+                                                </v-edit-dialog>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </v-data-table>
+                            </v-flex>
+                        </v-layout>
+                    </v-card>
+                </v-flex>
+            </v-layout>
+        </v-navigation-drawer>
+        <!-- MAIN BOARD -->
+        <svg id="board" style="width: 100%; height: 100%; overflow:visible"></svg>
+    </v-container>
 </template>
 
 <style scoped>
@@ -95,15 +109,15 @@
 }
 
 /* No inbuilt way to change data-table color, so override bg-color manually.
-Set to grey darken-4 */
+                        Set to grey darken-4 */
 
 #attr-row {
   background-color: #212121;
-  color: #E0E0E0;
+  color: #e0e0e0;
 }
 
 /* Hover color is lost when bg-color is manually set. Need to enable it
-manually as well. Set to grey darken-3 */
+                        manually as well. Set to grey darken-3 */
 
 #attr-row:hover {
   background-color: #424242;
@@ -113,9 +127,8 @@ manually as well. Set to grey darken-3 */
 <script>
 import * as d3 from "d3";
 import * as dagreD3 from "dagre-d3";
-import {
-  mapState
-} from "vuex";
+import { mapState } from "vuex";
+
 export default {
   name: "Draw",
   data() {
@@ -126,41 +139,42 @@ export default {
       edges: [],
       searchStr: "",
       selectedNode: {
-        "name": "Adam's Mad Aces",
-        "attr": [{
-            "name": "Name",
-            "value": "lorem"
+        name: "Adam's Mad Aces",
+        attr: [
+          {
+            name: "Name",
+            value: "lorem"
           },
           {
-            "name": "Filters",
-            "value": "3"
+            name: "Filters",
+            value: "3"
           },
           {
-            "name": "Activity Regularizer",
-            "value": "dolor"
+            name: "Activity Regularizer",
+            value: "dolor"
           },
           {
-            "name": "kernel regularizer",
-            "value": "sit"
+            name: "kernel regularizer",
+            value: "sit"
           },
           {
-            "name": "kernel initializer",
-            "value": "amet"
+            name: "kernel initializer",
+            value: "amet"
           },
           {
-            "name": "bias constraint",
-            "value": "consectectur"
+            name: "bias constraint",
+            value: "consectectur"
           },
           {
-            "name": "trainable",
-            "value": "true"
+            name: "trainable",
+            value: "true"
           },
           {
-            "name": "data format",
-            "value": "hello"
+            name: "data format",
+            value: "hello"
           }
         ]
-      },
+      }
     };
   },
   computed: {
@@ -253,8 +267,8 @@ export default {
     svg.call(
       zoom.transform,
       d3.zoomIdentity
-      .translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20)
-      .scale(initialScale)
+        .translate((svg.attr("width") - g.graph().width * initialScale) / 2, 20)
+        .scale(initialScale)
     );
 
     // svg.attr('height', g.graph().height * initialScale + 40);
