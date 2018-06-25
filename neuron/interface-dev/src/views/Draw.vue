@@ -47,7 +47,7 @@
                                                 </v-card-text>
                                             </v-card>
                                         </v-menu>
-                                        <v-divider></v-divider>
+                                        <v-divider :key="item.id"></v-divider>
                                     </template>
                                 </v-list>
                             </v-flex>
@@ -74,7 +74,8 @@
                                     <template slot="items" slot-scope="props">
                                         <tr id="attr-row">
                                             <!-- Attribute name -->
-                                            <th class="text-xs-center"> {{props.item.name}}</th>
+                                            <th class="text-xs-center"> {{props.item.name | titleCase}}</th>
+                                            <td class="pa-0">:</td>
                                             <!-- Attribute value -->
                                             <td width="100%">
                                                 <v-edit-dialog :return-value.sync="props.item.value" lazy>
@@ -107,18 +108,27 @@
 .scroll {
   overflow: auto;
 }
+.scroll::-webkit-scrollbar {
+    width:6px;
+    background-color: #6d6867;
+}
+.scroll::-webkit-scrollbar-thumb {
+    background-color: #2d2d2d;
+    border-radius: 15px;
+}
+.scroll::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #6d6867;
+    border-radius: 15px;
+}
 
-/* No inbuilt way to change data-table color, so override bg-color manually.
-                        Set to grey darken-4 */
-
+/* No inbuilt way to change data-table color, so override bg-color manually. */
 #attr-row {
-  background-color: #212121;
+  background-color: #2d2d2d;
   color: #e0e0e0;
 }
 
-/* Hover color is lost when bg-color is manually set. Need to enable it
-                        manually as well. Set to grey darken-3 */
-
+/* Hover color is lost when bg-color is manually set. Need to enable it */
 #attr-row:hover {
   background-color: #424242;
 }
@@ -324,6 +334,12 @@ export default {
         matcher,
         matched => '<span style="color:' + color + '">' + matched + "</span>"
       );
+    },
+    titleCase: function(str) {
+      if (!str) return "";
+      return str.replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
     }
   }
 };
