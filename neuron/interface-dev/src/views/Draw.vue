@@ -3,15 +3,20 @@
         <!-- LEFT DRAWER -->
         <v-navigation-drawer v-model="drawer" class="pa-0 noscroll" clipped app permanent>
             <v-layout column fill-height>
-                <v-flex xs1>
-                    Put some tabs here
+                <v-flex>
+                    <v-tabs color="grey darken-4">
+                        <v-tab active-class="grey darken-3">ADD</v-tab>
+                        <v-tab active-class="grey darken-3">LOREM</v-tab>
+                        <v-tab active-class="grey darken-3">IPSUM</v-tab>
+                        <v-tab active-class="grey darken-3">DOLOR</v-tab>
+                    </v-tabs>
                 </v-flex>
-                <v-flex style="min-height:0" xs7>
-                    <v-card height="100%" class="elevation-5">
+                <v-flex style="min-height:0" xs8>
+                    <v-card id="nodes-panel" height="100%" class="elevation-5">
                         <v-layout column fill-height>
                             <v-flex class="shrink">
                                 <!-- Search bar -->
-                                <v-text-field class="pa-2" :append-icon-cb="() => {}" placeholder="Search" single-line
+                                <v-text-field class="px-3 pb-0 pt-1 body-1" :append-icon-cb="() => {}" placeholder="Search nodes" single-line
                                               append-icon="search" color="white" hide-details
                                               v-model="searchStr"></v-text-field>
                             </v-flex>
@@ -30,7 +35,7 @@
                                             <!-- Node list item -->
                                             <v-list-tile slot="activator" @click="" color="grey lighten-1">
                                                 <v-list-tile-content>
-                                                    <v-list-tile-title
+                                                    <v-list-tile-title class="text-xs-center body-2"
                                                             v-html="$options.filters.highlight(item.name, searchStr, 'white')">
                                                         {{item.name}}
                                                     </v-list-tile-title>
@@ -47,7 +52,6 @@
                                                 </v-card-text>
                                             </v-card>
                                         </v-menu>
-                                        <v-divider :key="item.id"></v-divider>
                                     </template>
                                 </v-list>
                             </v-flex>
@@ -55,18 +59,15 @@
                     </v-card>
                 </v-flex>
 
-                <v-spacer></v-spacer>
-
                 <!-- Attributes panel -->
                 <v-flex style="min-height:0" xs4>
-                    <v-card height="100%" class="elevation-5 grey--text text--lighten-2" color="grey darken-4">
+                    <v-card height="100%" class="elevation-5 grey--text text--lighten-2">
                         <v-layout column fill-height>
                             <!-- Selection title -->
                             <v-flex class="shrink">
-                                <v-card-title class="justify-center subheading pa-1">
-                                    <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{selectedNode.name}}</em>
+                                <v-card-title class="justify-center subheading pa-1 attr-selection">
+                                    <b>Selection:</b>&nbsp <em style="color:#F4FF81">{{Object.keys(selectedNode).length === 0 ? 'NIL' : selectedNode.name}}</em>
                                 </v-card-title>
-                                <v-divider></v-divider>
                             </v-flex>
                             <!-- Attributes list -->
                             <v-flex class="scroll">
@@ -109,22 +110,22 @@
   overflow: auto;
 }
 .scroll::-webkit-scrollbar {
-    width:6px;
-    background-color: #6d6867;
+  width: 6px;
+  background-color: #6d6867;
 }
 .scroll::-webkit-scrollbar-thumb {
-    background-color: #2d2d2d;
-    border-radius: 15px;
+  background-color: #2d2d2d;
+  border-radius: 15px;
 }
 .scroll::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-    background-color: #6d6867;
-    border-radius: 15px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #6d6867;
+  border-radius: 15px;
 }
 
 /* No inbuilt way to change data-table color, so override bg-color manually. */
 #attr-row {
-  background-color: #2d2d2d;
+  background-color: #3c3c3c;
   color: #e0e0e0;
 }
 
@@ -132,6 +133,10 @@
 #attr-row:hover {
   background-color: #424242;
 }
+.attr-selection {
+    background-color: #2d2d2d;
+}
+
 </style>
 
 <script>

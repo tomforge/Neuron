@@ -2,8 +2,8 @@
 <v-app id="inspire" dark>
 
   <!--HEADER TOOLBAR-->
-  <v-toolbar color="gray darken-4" dense fixed clipped-left app>
-    <v-toolbar-title class="ml-5">
+  <v-toolbar color="grey darken-3" dense fixed clipped-left app>
+    <v-toolbar-title class="ml-3">
       <span class="display-1">neuron</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>

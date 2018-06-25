@@ -43,20 +43,22 @@ export default new Vuex.Store({
   state: {
     wsConnected: false,
     wsPayload: "",
-    nodeTypes: [{"id":0, "name":"test1", "doc":"lorem ipsum dolor sit amet"},
-      {"id":1, "name":"test2", "doc":"lorem ipsum dolor sit amet"},
-      {"id":2, "name":"test3", "doc":"lorem ipsum dolor sit amet"},
-      {"id":3, "name":"test4", "doc":"lorem ipsum dolor sit amet"},
-      {"id":4, "name":"test5", "doc":"lorem ipsum dolor sit amet"},
-      {"id":5, "name":"test6", "doc":"lorem ipsum dolor sit amet"},
-      {"id":6, "name":"test7", "doc":"lorem ipsum dolor sit amet"},
-      {"id":7, "name":"test8", "doc":"lorem ipsum dolor sit amet"},
-      {"id":8, "name":"test9", "doc":"lorem ipsum dolor sit amet"},
-      {"id":9, "name":"test10", "doc":"lorem ipsum dolor sit amet"},
-      {"id":10, "name":"test11", "doc":"lorem ipsum dolor sit amet"},
-      {"id":11, "name":"test12", "doc":"lorem ipsum dolor sit amet"},
-      {"id":12, "name":"test13", "doc":"lorem ipsum dolor sit amet"},
-      {"id":13, "name":"test14", "doc":"lorem ipsum dolor sit amet"}]
+    nodeTypes: [
+      { id: 0, name: "test1", doc: "lorem ipsum dolor sit amet" },
+      { id: 1, name: "test2", doc: "lorem ipsum dolor sit amet" },
+      { id: 2, name: "test3", doc: "lorem ipsum dolor sit amet" },
+      { id: 3, name: "test4", doc: "lorem ipsum dolor sit amet" },
+      { id: 4, name: "test5", doc: "lorem ipsum dolor sit amet" },
+      { id: 5, name: "test6", doc: "lorem ipsum dolor sit amet" },
+      { id: 6, name: "test7", doc: "lorem ipsum dolor sit amet" },
+      { id: 7, name: "test8", doc: "lorem ipsum dolor sit amet" },
+      { id: 8, name: "test9", doc: "lorem ipsum dolor sit amet" },
+      { id: 9, name: "test10", doc: "lorem ipsum dolor sit amet" },
+      { id: 10, name: "test11", doc: "lorem ipsum dolor sit amet" },
+      { id: 11, name: "test12", doc: "lorem ipsum dolor sit amet" },
+      { id: 12, name: "test13", doc: "lorem ipsum dolor sit amet" },
+      { id: 13, name: "test14", doc: "lorem ipsum dolor sit amet" }
+    ]
   },
   mutations: {
     // SOCKET_ prefixed mutations should be called only
