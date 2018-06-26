@@ -1,18 +1,19 @@
 <template>
     <v-container fluid fill-height>
         <!-- LEFT DRAWER -->
-        <v-navigation-drawer v-model="drawer" class="pa-0 noscroll" clipped app permanent>
+        <v-navigation-drawer v-model="drawer" class="pa-0 noscroll left-pane-style" clipped app permanent>
             <v-layout column fill-height>
                 <v-flex>
-                    <v-tabs color="grey darken-4">
-                        <v-tab active-class="grey darken-3">ADD</v-tab>
+                    <v-tabs slider-color="grey darken-4">
+                        <div class="attr-selection" style="width: 100%; height:100%">
+                        <v-tab active-class="grey darken-3">Add Nodes</v-tab>
                         <v-tab active-class="grey darken-3">LOREM</v-tab>
                         <v-tab active-class="grey darken-3">IPSUM</v-tab>
-                        <v-tab active-class="grey darken-3">DOLOR</v-tab>
+                        </div>
                     </v-tabs>
                 </v-flex>
-                <v-flex style="min-height:0" xs8>
-                    <v-card id="nodes-panel" height="100%" class="elevation-5">
+                <v-flex class="panel-style" style="min-height:0" xs8>
+                    <v-card id="nodes-panel" height="100%">
                         <v-layout column fill-height>
                             <v-flex class="shrink">
                                 <!-- Search bar -->
@@ -60,7 +61,7 @@
                 </v-flex>
 
                 <!-- Attributes panel -->
-                <v-flex style="min-height:0" xs4>
+                <v-flex class="panel-style" style="min-height:0" xs4>
                     <v-card height="100%" class="elevation-5 grey--text text--lighten-2">
                         <v-layout column fill-height>
                             <!-- Selection title -->
@@ -122,7 +123,20 @@
   background-color: #6d6867;
   border-radius: 15px;
 }
-
+.panel-style {
+  border-top: hidden;
+  border-left: 4px inset #212121;
+  border-right: 4px inset #212121;
+  border-bottom: 4px inset #212121;
+  border-radius: 10px;
+}
+.left-pane-style {
+  border-top: hidden;
+  border-left: hidden;
+  border-right: 4px solid #191919;
+  border-bottom: hidden;
+  border-radius: 5px;
+}
 /* No inbuilt way to change data-table color, so override bg-color manually. */
 #attr-row {
   background-color: #3c3c3c;
@@ -134,9 +148,8 @@
   background-color: #424242;
 }
 .attr-selection {
-    background-color: #2d2d2d;
+  background-color: #2d2d2d;
 }
-
 </style>
 
 <script>
