@@ -7,11 +7,11 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "interface")
 
 INSTALLED_MODULES = [
-    # TODO: Add modules
+    "tfClientModule.TFClientModule"
     ]
 
-# 
-# Websocket settings 
+#
+# Websocket settings
 #
 
 # The websocket endpoint, accessible at ws://<host>/<WS_ROUTE>

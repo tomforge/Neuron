@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger("server")
 from autobahn.twisted.websocket import WebSocketServerFactory
+from neuron import utils
 
 class WSManagerFactory(WebSocketServerFactory):
     """
@@ -69,7 +70,7 @@ class WSManagerFactory(WebSocketServerFactory):
     def dispatchToSubscribers(self, event, data, sender):
         """
         This is the main router function for client side events. All
-        client events will be handled here and dispatched to 
+        client events will be handled here and dispatched to
         backend subscribers.
         Raises:
             KeyError: If event is not in events list
@@ -78,25 +79,19 @@ class WSManagerFactory(WebSocketServerFactory):
             for subscriber in self.eventSubscriptions[event]:
                 try:
                     subscriber.notify(event, data, sender.peer)
-                except (AttributeError, TypeError):
-                    logger.error("Subscriber " + str(subscriber)
-                                  + " does not implement the 'notify(event, data, addr)' endpoint")
+                except (AttributeError, TypeError) as e:
+                    logger.error(str(e))
         except KeyError:
             logger.warning("Received unsubscribed event " + str(event)
                             + " from " + sender.peer)
-
-    def constructPayload(event, data):
-        """
-        Helper function to construct a payload for sending to clients
-        """
-        return json.dumps([event, data], ensure_ascii=False).encode('utf8')
 
     def triggerEvent(self, event, data, addr=None):
         """
         Sends an event to the client of the given address. If
         not address is given, the event is broadcasted to all clients
         """
-        payload = constructPayload(event, data)
+        payload = utils.constructEventJSON(event, data)
+        logger.debug(payload)
         if addr is None:
             for _, client in self.clients.items():
                 client.sendMessage(payload, isBinary = False)

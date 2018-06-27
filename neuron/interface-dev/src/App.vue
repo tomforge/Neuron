@@ -1,10 +1,14 @@
 <template>
 <v-app id="inspire" dark>
 
+  <v-system-bar status app lights-out>
+    <v-spacer></v-spacer>
+    <span class="headline text-xs-center">neuron</span>
+    <v-spacer></v-spacer>
+  </v-system-bar>
   <!--HEADER TOOLBAR-->
-  <v-toolbar color="gray darken-4" dense fixed clipped-left app>
-    <v-toolbar-title class="ml-5">
-      <span class="display-1">neuron</span>
+  <v-toolbar color="grey darken-3" dense fixed clipped-left app>
+    <v-toolbar-title class="ml-3">
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
@@ -45,7 +49,7 @@
   </v-toolbar>
 
   <!--MAIN VIEW WINDOW-->
-  <v-content>
+  <v-content style="background-color: #212121;">
     <router-view></router-view>
   </v-content>
 </v-app>
