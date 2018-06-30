@@ -328,7 +328,7 @@ export default {
             .attr("orient", "auto")
             .append("svg:path")
             .attr("d", "M 0 0 L 10 5 L 0 10 L 4 5 z")
-            .style("stroke-width", 1)
+            .style("stroke-width", 4)
             .style("stroke-dasharray", "1,0")
             .attr("fill", "#a5a5a5");
 
@@ -415,13 +415,16 @@ export default {
             }
           })
           .on("mousedown", function(d) {
+            // d3.event.stopPropagation();
+            svg.on('.zoom', null);
+            console.log('node mousedown');
+
             mousedown_node = d;
 
             // Retrieve node using node's name
             md_node = g.node(d);
             md_node_x = md_node.x + md_node.width / 2;
             md_node_y = md_node.y;
-            // console.log(md_node);
 
             /* This line doesn't do anything if I'm not wrong */
             drag_line
@@ -440,6 +443,7 @@ export default {
           })
           .on("mouseup", function(d) {
             if (!mousedown_node) return;
+            svg.call(zoom);
 
             // needed by FF
             drag_line.classed("hidden", true).style("marker-end", "");
@@ -481,27 +485,37 @@ export default {
         // Handle mouse events for edges
         d3.selectAll(".edgePath, .edgeLabel")
           .on("mouseover", function(d) {
-            // console.log(d);
             let dClass = d3.select(this).attr("class");
-            // console.log(dClass);
             if (dClass === "edgeLabel") {
               if (!pre_scale) {
                 pre_scale = d3.select(this).attr("transform");
                 d3.select(this).attr("transform", pre_scale + " scale(1.2)");
               }
             } else if (dClass === "edgePath") {
-              // doesnt work yet
-              d3.select(this).attr("stroke-width", "2px");
+              d3.select(this)
+                .select('.path')
+                .transition()
+                .duration(25)
+                .style('stroke-width', '8');
             }
           })
           .on("mouseout", function(d) {
-            if (pre_scale) {
-              d3.select(this).attr("transform", pre_scale);
-              pre_scale = null;
-            }
+            let dClass = d3.select(this).attr("class");
+            if (dClass === "edgeLabel") {
+              if (pre_scale) {
+                d3.select(this).attr("transform", pre_scale);
+                pre_scale = null;
+              }
+            } else {
+              d3.select(this)
+                .select('.path')
+                .transition()
+                .duration(50)
+                .style('stroke-width', '4');
+            }            
           })
           .on("click", function(d) {
-            console.log("clicked edge");
+            console.log("clicked edge: " + JSON.stringify(g.edge(d)));
             mousedown_link = d;
             if (mousedown_link !== selected_link) {
               selected_link = mousedown_link;
@@ -512,8 +526,8 @@ export default {
         // Handle keypress events in body element (as SVG elements cannot detect keypress)
         d3.select("body").on("keydown", function() {
           if (d3.event.keyCode === 46) {
-            console.log("node to delete: " + selected_node);
-            console.log("edge to delete: " + JSON.stringify(selected_link));
+            // console.log("node to delete: " + selected_node);
+            // console.log("edge to delete: " + JSON.stringify(selected_link));
             if (selected_node) {
               self.nodes = self.nodes.filter(function(n) {
                 return n.name !== selected_node;
@@ -542,15 +556,14 @@ export default {
       function mousemove() {
         // console.log('svg mousemove, mousedown_node=' + mousedown_node + ', hide_line ' +hide_line);
         if (!mousedown_node) return;
-
         drag_line
           .classed("hidden", hide_line)
           .attr(
             "d",
             "M" +
-              md_node_x +
+              (md_node_x + zoomTrans.x) * zoomTrans.scale +
               "," +
-              md_node_y +
+              (md_node_y + zoomTrans.y) * zoomTrans.scale +
               "L" +
               d3.mouse(this)[0] +
               "," +
@@ -573,14 +586,35 @@ export default {
       }
 
       let svg = d3.select("svg");
-      // line displayed when dragging new nodes
+      // line displayed when dragging new edges
       let drag_line = svg
         .append("svg:path")
         .attr("class", "link dragline hidden")
         .attr("marker-mid", "")
         .attr("d", "M0,0L0,0");
 
-      svg.on("mousemove", mousemove).on("mouseup", mouseup);
+      let zoomTrans = {
+        x: 0,
+        y: 0,
+        scale: 1
+      }
+
+      let zoom = d3.zoom()
+        .scaleExtent([1, Infinity])
+        .on('zoom', function() {
+          zoomTrans.x = d3.event.transform.x;
+          zoomTrans.y = d3.event.transform.y;
+          zoomTrans.scale = d3.event.transform.k;
+          svg.select('g').attr("transform", d3.event.transform);
+        })
+
+      svg.call(zoom);
+      svg.on("mousemove", mousemove)
+        .on("mouseup", mouseup);
+
+      // let drag = d3.drag().on('drag', function(d) {
+      //   svg.attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+      // })
     },
     addNode() {
       this.nodes.push({
@@ -699,7 +733,7 @@ svg {
 }
 
 .edgePath path.path {
-  stroke-width: 2px;
+  stroke-width: 4px;
   fill: none;
 }
 
