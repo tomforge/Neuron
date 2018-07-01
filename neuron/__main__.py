@@ -18,7 +18,7 @@ def main():
     router.setProtocolOptions(**settings.AUTOBAHN_PROTOCOL_OPTIONS)
 
     # Initialize modules
-    modules = map(utils.getClassFromModuleString, settings.INSTALLED_MODULES)
+    modules = map(utils.get_class, settings.INSTALLED_MODULES)
     for module in modules:
         module(router)
 

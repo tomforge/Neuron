@@ -90,7 +90,7 @@ class WSManagerFactory(WebSocketServerFactory):
         Sends an event to the client of the given address. If
         not address is given, the event is broadcasted to all clients
         """
-        payload = utils.constructEventJSON(event, data)
+        payload = utils.construct_event_json(event, data)
         logger.debug(payload)
         if addr is None:
             for _, client in self.clients.items():
