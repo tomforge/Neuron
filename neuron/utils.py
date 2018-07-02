@@ -57,7 +57,7 @@ def match_expr(expr):
     """
     if not expr:
         return None, ""
-    elif expr.isalpha():
+    elif expr[0].isalpha():
         return match_ident(expr)
     elif expr[0] == "'" or expr[0] == '"':
         return match_string_expr(expr)
