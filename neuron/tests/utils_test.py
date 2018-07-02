@@ -1,4 +1,4 @@
-def parse_expr_test():
+def test_parse_expr():
     assert utils.parse_expr("(1,)") == (1,)
     assert utils.parse_expr("1") == 1
     assert utils.parse_expr("+1") == 1
@@ -12,3 +12,4 @@ def parse_expr_test():
     assert utils.parse_expr("\"123\"") == "123"
     assert utils.parse_expr("(101.5, +152, -3, 'dolor', -3.14159)") == (101.5, 152, -3, "dolor", -3.14159)
     assert utils.parse_expr("((1,), +152, -3, 'dolor', -3.14159, (121, \"sit\"))") == ((1,), +152, -3, 'dolor', -3.14159, (121, "sit"))
+    assert utils.parse_expr("(None, 'lorem', True, False)") == (None, "lorem", True, False)
