@@ -1,6 +1,3 @@
-from neuron import utils
-
-
 def parse_expr_test():
     assert utils.parse_expr("(1,)") == (1,)
     assert utils.parse_expr("1") == 1
