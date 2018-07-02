@@ -1,11 +1,12 @@
 # Compiled files
 __pycache__/
+*.pyc
 
 # IDE files
 *.pyproj
 *.sln
 .vs/
+.idea/
 
 # NPM files
 node_modules/
-package-lock.json
