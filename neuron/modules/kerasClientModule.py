@@ -1,7 +1,7 @@
 from collections import deque
 from neuron.modules.baseModule import BaseModule
 from neuron import utils
-import tensorflow as tf
+import keras
 import logging
 import inspect
 
@@ -11,11 +11,11 @@ logger = logging.getLogger("KerasClientModule")
 class KerasClientModule(BaseModule):
     # Data structure:
     # <Graph> := {"nodes": [<Node>], "edges": [<Edge>]}
-    # <Node> := {"id": int, "type": int, "params": {string: expr}}
+    # <Node> := {"id": int, "type": string, "params": {string: expr}}
     # <Edge> := [{"src": <Node>}, {"dest": <Node>}]
 
     def startup(self):
-        self.node_list = [tf.layers.conv2d, tf.layers.dense, tf.layers.max_pooling2d, tf.layers.dropout]
+        self.node_types = {name: op for name, op in inspect.getmembers(keras.layers, inspect.isclass)}
         self.id_to_op = {}
         self.id_to_node = {}
         self.adj_list = {}
@@ -69,7 +69,7 @@ class KerasClientModule(BaseModule):
 
     def build_op(self, node):
         params = {k: utils.parse_expr(v) for k, v in node["params"]}
-        return self.node_list[node["type"]](**params)
+        return self.node_types[node["type"]](**params)
 
     def API_run_graph(self, output_node):
         pass
@@ -98,14 +98,17 @@ class KerasClientModule(BaseModule):
         """ Prepare a representation of the internal nodeList array for
         sending to clients"""
         res = []
-        for idx, func in enumerate(self.node_list):
-            params = inspect.signature(func).parameters
-            for k, p in params.items():
-                params[k] = None if p.default is inspect.Parameter.empty else p.default
+        logger.debug("Getting node meta")
+        for name, op in self.node_types.items():
+            params = {}
+            for param_name, param in inspect.signature(op).parameters.items():
+                if param_name == "kwargs":
+                    continue
+                params[param_name] = None if param.default == inspect.Parameter.empty else param.default
+
             node_type = {
-                "type": idx,
-                "name": func.__name__,
-                "doc": func.__doc__,
+                "type": name,
+                "doc": op.__doc__,
                 "params": params
             }
             res.append(node_type)

@@ -26,7 +26,7 @@
                             <v-flex class="scroll">
                                 <v-list>
                                     <template v-for="item in filteredNodeTypes">
-                                        <v-menu :key="item.id"
+                                        <v-menu :key="item.type"
                                                 open-on-hover
                                                 open-delay="200"
                                                 close-delay="0"
@@ -35,18 +35,18 @@
                                                 full-width
                                                 :close-on-content-click="false">
                                             <!-- Node list item -->
-                                            <v-list-tile slot="activator" @click="" color="grey lighten-1">
+                                            <v-list-tile slot="activator" @click="addNode(item)" color="grey lighten-1">
                                                 <v-list-tile-content>
                                                     <v-list-tile-title class="text-xs-center body-2"
-                                                                       v-html="$options.filters.highlight(item.name, searchStr, 'white')">
-                                                        {{item.name}}
+                                                                       v-html="$options.filters.highlight(item.type, searchStr, 'white')">
+                                                        {{item.type}}
                                                     </v-list-tile-title>
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                             <!--Doc viewer popup-->
-                                            <v-card class="scroll" flat color="grey darken-2" height="500px">
+                                            <v-card class="scroll" flat color="grey darken-2" height="500px" width="750px">
                                                 <v-card-title>
-                                                    <span class="headline">{{item.name}}</span>
+                                                    <span class="headline">{{item.type}}</span>
                                                 </v-card-title>
                                                 <v-card-text>
                                                     <!--TODO: better formatting for docs-->
@@ -68,31 +68,33 @@
                             <!-- Selection title -->
                             <v-flex class="shrink">
                                 <v-card-title class="justify-center subheading pa-1 attr-selection">
-                                    <b>Selection:</b>&nbsp; <em style="color:#F4FF81">{{Object.keys(selectedNode).length
-                                    === 0 ? 'NIL' : selectedNode.name}}</em>
+                                    <b>Selection:</b>&nbsp; <em style="color:#F4FF81">{{selectedNode === null ? 'NIL' : selectedNode.type}}</em>
                                 </v-card-title>
                             </v-flex>
                             <!-- Attributes list -->
                             <v-flex class="scroll">
-                                <v-data-table :items="selectedNode.attr" hide-actions hide-headers>
+                                <v-data-table :items="Object.entries(selectedNode.params)" v-if="selectedNode !== null" hide-actions hide-headers>
                                     <template slot="items" slot-scope="props">
                                         <tr id="attr-row">
                                             <!-- Attribute name -->
-                                            <th class="text-xs-center"> {{props.item.name | titleCase}}</th>
+                                            <th class="text-xs-center"> {{props.item[0] | titleCase}}</th>
                                             <td class="pa-0">:</td>
                                             <!-- Attribute value -->
                                             <td width="100%">
-                                                <v-edit-dialog :return-value.sync="props.item.value" lazy>
+                                                <v-edit-dialog :return-value.sync="selectedNode.params[props.item[0]]" lazy>
                                                     <!-- Value display -->
-                                                    <span class="text-xs-center">{{props.item.value}}</span>
+                                                    <span class="text-xs-center">{{props.item[1]}}</span>
                                                     <!-- Value edit display -->
-                                                    <v-text-field slot="input" v-model="props.item.value"
+                                                    <v-text-field slot="input" v-model="selectedNode.params[props.item[0]]"
                                                                   label="Edit" single-line></v-text-field>
                                                 </v-edit-dialog>
                                             </td>
                                         </tr>
                                     </template>
                                 </v-data-table>
+                                <span v-if="selectedNode == null" class="justify-center">
+                                    <em class="text-xs-center" style="color:#FFFFFF">No data available.</em>
+                                </span>
                             </v-flex>
                         </v-layout>
                     </v-card>
@@ -177,9 +179,9 @@ export default {
       graph: "",
       nodes: [],
       edges: [],
-      nodeCounter: 1,
+      nodeCounter: 0,
       searchStr: "",
-      selectedNode: {}
+      selectedNode: null
     };
   },
   computed: {
@@ -196,7 +198,8 @@ export default {
         return this.nodeTypes.filter(
           // Return only word-boundary matches (e.g. don't return "add" if
           // searching for "d")
-          nodeType => nodeType.name.search("\\b" + this.searchStr) !== -1
+          nodeType =>
+            nodeType.type.search(new RegExp("\\b" + this.searchStr, "i")) !== -1
         );
       }
     }
@@ -416,8 +419,8 @@ export default {
           })
           .on("mousedown", function(d) {
             // d3.event.stopPropagation();
-            svg.on('.zoom', null);
-            console.log('node mousedown');
+            svg.on(".zoom", null);
+            console.log("node mousedown");
 
             mousedown_node = d;
 
@@ -493,10 +496,10 @@ export default {
               }
             } else if (dClass === "edgePath") {
               d3.select(this)
-                .select('.path')
+                .select(".path")
                 .transition()
                 .duration(25)
-                .style('stroke-width', '8');
+                .style("stroke-width", "8");
             }
           })
           .on("mouseout", function(d) {
@@ -508,11 +511,11 @@ export default {
               }
             } else {
               d3.select(this)
-                .select('.path')
+                .select(".path")
                 .transition()
                 .duration(50)
-                .style('stroke-width', '4');
-            }            
+                .style("stroke-width", "4");
+            }
           })
           .on("click", function(d) {
             console.log("clicked edge: " + JSON.stringify(g.edge(d)));
@@ -597,63 +600,31 @@ export default {
         x: 0,
         y: 0,
         scale: 1
-      }
+      };
 
-      let zoom = d3.zoom()
+      let zoom = d3
+        .zoom()
         .scaleExtent([1, Infinity])
-        .on('zoom', function() {
+        .on("zoom", function() {
           zoomTrans.x = d3.event.transform.x;
           zoomTrans.y = d3.event.transform.y;
           zoomTrans.scale = d3.event.transform.k;
-          svg.select('g').attr("transform", d3.event.transform);
-        })
+          svg.select("g").attr("transform", d3.event.transform);
+        });
 
       svg.call(zoom);
-      svg.on("mousemove", mousemove)
-        .on("mouseup", mouseup);
+      svg.on("mousemove", mousemove).on("mouseup", mouseup);
 
       // let drag = d3.drag().on('drag', function(d) {
       //   svg.attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
       // })
     },
-    addNode() {
+    addNode(node_type) {
       this.nodes.push({
-        type: "host",
-        name: "node" + this.nodeCounter++,
-        attr: [
-          {
-            name: "Name",
-            value: "lorem"
-          },
-          {
-            name: "Filters",
-            value: "3"
-          },
-          {
-            name: "Activity Regularizer",
-            value: "dolor"
-          },
-          {
-            name: "kernel regularizer",
-            value: "sit"
-          },
-          {
-            name: "kernel initializer",
-            value: "amet"
-          },
-          {
-            name: "bias constraint",
-            value: "consectectur"
-          },
-          {
-            name: "trainable",
-            value: "true"
-          },
-          {
-            name: "data format",
-            value: "hello"
-          }
-        ]
+        id: ++this.nodeCounter,
+        type: node_type.type,
+        name: node_type.type + this.nodeCounter,
+        params: node_type.params
       });
       this.graphEditor(); // re-render after adding node
     }
