@@ -5,7 +5,7 @@
         <h1>Run page</h1>
         <v-btn v-on:click.native ="triggerClick" >Upload training data</v-btn>
         <input type="file" @change="onFileChange" ref="inputButton">
-        <v-text-field :value="trainingData.name" outline readonly ref="inputFile"></v-text-field>
+        <v-text-field :value="trainingData.name" outline readonly></v-text-field>
       </v-flex>
     </v-layout>
   </v-container>
@@ -20,7 +20,10 @@
       }
     },
     methods: {
-      triggerClick() {
+      triggerClick() { 
+        // I'm using a vuetify-button so I need to trigger the JS input button click
+        // event upon clicking the vueitfy-button. The JS input button is actually
+        // hidden in the style portion.
         this.$refs.inputButton.click();
       },
       onFileChange(e) {
@@ -28,7 +31,6 @@
         if (!files.length)
           return;
         this.trainingData = files[0];
-        // this.$refs.inputFile.value = this.trainingData;
       }
     }
   }
