@@ -3,6 +3,7 @@
     <v-layout align-center justify-center>
       <v-flex shrink>
         <h1>Visualize page</h1>
+        <p>View training statistics</p>
       </v-flex>
     </v-layout>
   </v-container>

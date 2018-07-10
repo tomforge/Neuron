@@ -105,7 +105,7 @@
         <svg>
             <g/>
         </svg>
-        <v-btn v-on:click.native="addNode">Add Node</v-btn>
+        <!-- <v-btn v-on:click.native="addNode">Add Node</v-btn> -->
     </v-container>
 </template>
 
@@ -539,6 +539,7 @@ export default {
                 return e.source !== selected_node && e.target !== selected_node;
               });
               selected_node = null;
+              self.selectedNode = null;
             } else if (selected_link) {
               self.edges = self.edges.filter(function(e) {
                 return (
@@ -604,7 +605,7 @@ export default {
 
       let zoom = d3
         .zoom()
-        .scaleExtent([1, Infinity])
+        .scaleExtent([0, Infinity])
         .on("zoom", function() {
           zoomTrans.x = d3.event.transform.x;
           zoomTrans.y = d3.event.transform.y;
@@ -623,7 +624,7 @@ export default {
       this.nodes.push({
         id: ++this.nodeCounter,
         type: node_type.type,
-        name: node_type.type + this.nodeCounter,
+        name: node_type.type  + "<br/> ID: " + this.nodeCounter,
         params: node_type.params
       });
       this.graphEditor(); // re-render after adding node
