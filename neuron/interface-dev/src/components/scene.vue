@@ -208,7 +208,7 @@ export default {
             // select node
             if (self.selected_node_id !== d) {
               self.selected_node_id = d;
-              self.$store.commit("selectNode", d);
+              self.$store.commit("selectNodeById", d);
             }
             self.selected_link = null;
           } else {

@@ -126,7 +126,7 @@ export default new Vuex.Store({
         e => !(e.source === edge.v && e.target === edge.w)
       );
     },
-    selectNode(state, nodeId) {
+    selectNodeById(state, nodeId) {
       state.selectedNode =
         nodeId === null ? null : state.graph.nodes.find(n => n.name === nodeId);
     }
