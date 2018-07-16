@@ -34,6 +34,7 @@ export default {
       md_node_x: null,
       md_node_y: null,
       hide_line: true
+      ctrlDown: false
     };
   },
   mounted() {
@@ -314,6 +315,73 @@ export default {
           self.resetMouseVars();
         });
     },
+    setKeyEvents() {
+      // Handle key-press events in body element (as SVG elements cannot detect them)
+      d3.select("body")
+        .on("keydown", () => {
+          switch (d3.event.keycode) {
+            // DEL and Backspace
+            case 46:
+            case 8:
+              if (this.selected_node_id) {
+                this.$store.commit("removeNodeGivenId", this.selected_node_id);
+                this.$store.commit("selectNodeById", null);
+              } else if (this.selected_link) {
+                this.$store.commit("removeEdge", this.selected_link);
+              }
+              this.refreshGraph();
+              break;
+            // CTRL
+            case 17:
+              this.ctrlDown = true;
+              break;
+            // Z
+            case 90:
+              if (this.ctrlDown) {
+                this.$store.commit("undo");
+              }
+              break;
+            // R
+            case 82:
+              if (this.ctrlDown) {
+                this.$store.commit("redo");
+              }
+              break;
+          }
+        })
+        .on("keyup", () => {
+          switch (d3.event.keycode) {
+            // CTRL
+            case 17:
+              this.ctrlDown = false;
+              break;
+          }
+        });
+    },
+    resetMouseVars() {
+      this.md_node_id = null;
+      this.md_node_x = null;
+      this.md_node_y = null;
+      this.hide_line = true;
+    },
+    renderGraph() {
+      // Create the renderer
+      let render = new dagreD3.render();
+      render(self.g_selection, self.rendered_graph);
+
+      // define arrow markers for graph links
+      self.setEdgeArrowMarkerStyle();
+      self.setNodeMouseEvents();
+      self.setEdgeMouseEvents();
+    },
+    refreshGraph() {
+      // Preparation of DagreD3 data structures
+      this.initGraph();
+      this.resetMouseVars();
+      this.refreshNodesInRendering();
+      this.refreshEdgesInRendering();
+      this.renderGraph();
+    },
     initGraphEditor() {
       this.refreshGraph();
       let self = this;
@@ -345,20 +413,6 @@ export default {
         });
 
       self.svg_selection.call(zoom);
-    },
-    setKeyEvents() {
-      // Handle key-press events in body element (as SVG elements cannot detect them)
-      d3.select("body").on("keydown", () => {
-        if (d3.event.keyCode === 46) {
-          if (this.selected_node_id) {
-            this.$store.commit("removeNode", this.selected_node_id);
-            this.$store.commit("selectNode", null);
-          } else if (this.selected_link) {
-            this.$store.commit("removeEdge", this.selected_link);
-          }
-          this.refreshGraph();
-        }
-      });
     }
   }
 };
