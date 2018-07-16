@@ -33,7 +33,7 @@ export default {
       md_node: null,
       md_node_x: null,
       md_node_y: null,
-      hide_line: true
+      hide_line: true,
       ctrlDown: false
     };
   },
@@ -157,21 +157,6 @@ export default {
       feMerge.append("feMergeNode").attr("in", "offsetBlur");
       feMerge.append("feMergeNode").attr("in", "litPaint");
     },
-    resetMouseVars() {
-      this.md_node_id = null;
-      this.md_node_x = null;
-      this.md_node_y = null;
-      this.hide_line = true;
-    },
-    refreshGraph() {
-      // Preparation of DagreD3 data structures
-      this.initGraph();
-      this.resetMouseVars();
-      this.refreshNodesInRendering();
-      this.refreshEdgesInRendering();
-      this.renderGraph();
-    },
-
     setNodeMouseEvents() {
       let self = this;
       // Handle mouse events for nodes
@@ -203,7 +188,7 @@ export default {
           self.drag_line_selection
             .classed("hidden", true)
             .style("marker-end", "");
-          // check for drag-to-self
+          // check for drag-to-self (i.e. click)
           if (self.md_node_id === d) {
             // select node
             if (self.selected_node_id !== d) {
@@ -223,12 +208,11 @@ export default {
                 target: self.mu_node_id
               });
             }
-            self.renderGraph();
+            self.refreshGraph();
           }
           self.resetMouseVars();
         });
     },
-
     setEdgeMouseEvents() {
       d3.selectAll(".edgePath, .edgeLabel")
         .on("mouseover", function(d) {
@@ -259,21 +243,6 @@ export default {
           self.selected_node = null;
           self.selectedNode = null;
         });
-    },
-
-    renderGraph() {
-      // Create the renderer
-      let render = new dagreD3.render();
-      // Set graph height and init zoom
-      let svg = d3.select("svg");
-      let container = svg.select("g");
-      render(container, self.rendered_graph);
-
-      // define arrow markers for graph links
-      self.setEdgeArrowMarkerStyle();
-
-      self.setNodeMouseEvents();
-      self.setEdgeMouseEvents();
     },
     setSVGMouseEvents() {
       let zoomTrans = {
