@@ -44,9 +44,9 @@
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                             <!--Doc viewer popup-->
-                                            <v-card class="scroll" flat color="grey darken-2" height="500px" width="750px">
+                                            <v-card class="scroll" flat color="grey darken-2" height="400px" width="300px">
                                                 <v-card-title>
-                                                    <span class="headline">{{item.type}}</span>
+                                                    <span class="title">{{item.type}}</span>
                                                 </v-card-title>
                                                 <v-card-text>
                                                     <!--TODO: better formatting for docs-->
@@ -68,12 +68,14 @@
                             <!-- Selection title -->
                             <v-flex class="shrink">
                                 <v-card-title class="justify-center subheading pa-1 attr-selection">
-                                    <b>Selection:</b>&nbsp; <em style="color:#F4FF81">{{selectedNode === null ? 'NIL' : selectedNode.type}}</em>
+                                    <em style="color:#F4FF81" v-if="selectedNode !== null">{{selectedNode.type}}</em>
+                                    <!-- Leave a space if no selected node-->
+                                    <span v-if="selectedNode === null">&nbsp;</span>
                                 </v-card-title>
                             </v-flex>
                             <!-- Attributes list -->
                             <v-flex class="scroll">
-                                <v-data-table :items="Object.entries(selectedNode.params)" v-if="selectedNode !== null" hide-actions hide-headers>
+                                <v-data-table :items="selectedNode === null ? [] : Object.entries(selectedNode.params)" hide-actions hide-headers>
                                     <template slot="items" slot-scope="props">
                                         <tr id="attr-row">
                                             <!-- Attribute name -->
@@ -92,9 +94,6 @@
                                         </tr>
                                     </template>
                                 </v-data-table>
-                                <span v-if="selectedNode == null" class="justify-center">
-                                    <em class="text-xs-center" style="color:#FFFFFF">No data available.</em>
-                                </span>
                             </v-flex>
                         </v-layout>
                     </v-card>
