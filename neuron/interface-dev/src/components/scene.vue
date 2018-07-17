@@ -10,13 +10,12 @@ import * as dagreD3 from "dagre-d3";
 import { mapState } from "vuex";
 
 export default {
-  name: "graph-scene",
+  name: "scene",
   computed: {
     // vuex state
     ...mapState({
       nodes: "nodes",
-      edges: "edges",
-      selectedNode: "selectedNode"
+      edges: "edges"
     })
   },
   data() {
@@ -34,13 +33,43 @@ export default {
       md_node_x: null,
       md_node_y: null,
       hide_line: true,
-      ctrlDown: false
+      ctrlDown: false,
+      shiftDown: false
     };
   },
   mounted() {
     this.svg_selection = d3.select("svg");
     this.g_selection = this.svg_selection.select("g");
-    this.initGraphEditor();
+
+    // init line displayed when dragging new edges
+    this.drag_line_selection = this.svg_selection
+      .append("svg:path")
+      .attr("class", "link dragline hidden")
+      .attr("marker-mid", "")
+      .attr("d", "M0,0L0,0");
+
+    let zoomTrans = {
+      x: 0,
+      y: 0,
+      scale: 1
+    };
+    // Init zoom events
+    this.zoom = d3
+      .zoom()
+      .scaleExtent([0, Infinity])
+      .on("zoom", () => {
+        zoomTrans.x = d3.event.transform.x;
+        zoomTrans.y = d3.event.transform.y;
+        zoomTrans.scale = d3.event.transform.k;
+        this.g_selection.attr("transform", d3.event.transform);
+      });
+
+    this.setSVGMouseEvents();
+    this.setKeyEvents();
+
+    this.svg_selection.call(this.zoom);
+    this.refreshGraph();
+
     this.$store.watch(
       // The only operations are addition and removal, so we only
       // need to track the length of the two arrays. Multiply edges by
@@ -60,7 +89,7 @@ export default {
       });
     },
     refreshNodesInRendering() {
-      self.nodes.forEach(function(node) {
+      this.nodes.forEach(node => {
         this.rendered_graph.setNode(node.name, {
           labelType: "html",
           label: node.name,
@@ -72,7 +101,7 @@ export default {
       });
     },
     refreshEdgesInRendering() {
-      self.edges.forEach(function(edge) {
+      this.edges.forEach(edge => {
         this.rendered_graph.setEdge(edge.source, edge.target, {
           label: "",
           labelStyle: "fill: #FFFFFF",
@@ -158,65 +187,61 @@ export default {
       feMerge.append("feMergeNode").attr("in", "litPaint");
     },
     setNodeMouseEvents() {
-      let self = this;
       // Handle mouse events for nodes
       d3.selectAll("svg g.node")
         .on("mouseover", function(d) {
           //TODO: Highlight on hover
         })
-        .on("mouseout", function(d) {
-          if (self.md_node_id === d) {
-            self.hide_line = false;
+        .on("mouseout", d => {
+          if (this.md_node_id === d) {
+            this.hide_line = false;
           }
         })
-        .on("mousedown", function(d) {
+        .on("mousedown", d => {
           // Disable zoom
-          self.svg_selection.on(".zoom", null);
+          this.svg_selection.on(".zoom", null);
           console.log("node mousedown");
 
-          self.md_node_id = d;
-          // Retrieve node using node's name
-          self.md_node = self.rendered_graph.node(d);
-          self.md_node_x = self.md_node.x + self.md_node.width / 2;
-          self.md_node_y = self.md_node.y;
+          this.md_node_id = d;
+          // Retrieve rendered node using node's id
+          this.md_node = this.rendered_graph.node(d);
+          this.md_node_x = this.md_node.x + this.md_node.width / 2;
+          this.md_node_y = this.md_node.y;
         })
-        .on("mouseup", function(d) {
-          if (!self.md_node_id) return;
+        .on("mouseup", d => {
+          if (!this.md_node_id) return;
           // Re-enable zoom
-          self.svg_selection.call(self.zoom);
+          this.svg_selection.call(this.zoom);
           // needed by FF
-          self.drag_line_selection
+          this.drag_line_selection
             .classed("hidden", true)
             .style("marker-end", "");
           // check for drag-to-self (i.e. click)
-          if (self.md_node_id === d) {
+          if (this.md_node_id === d) {
             // select node
-            if (self.selected_node_id !== d) {
-              self.selected_node_id = d;
-              self.$store.commit("selectNodeById", d);
+            if (this.selected_node_id !== d) {
+              this.selected_node_id = d;
+              this.$store.commit("selectNodeById", d);
             }
-            self.selected_link = null;
+            this.selected_link = null;
           } else {
             //Check if there is an existing edge between mousedown and mouseup nodes
-            let existing_edge = self.g_selection.edge(
-              self.md_node_id,
-              self.mu_node_id
-            );
+            let existing_edge = this.rendered_graph.edge(this.md_node_id, d);
             if (!existing_edge) {
-              self.edges.push({
-                source: self.md_node_id,
-                target: self.mu_node_id
+              this.edges.push({
+                source: this.md_node_id,
+                target: d
               });
             }
-            self.refreshGraph();
+            this.refreshGraph();
           }
-          self.resetMouseVars();
+          this.resetMouseVars();
         });
     },
     setEdgeMouseEvents() {
       d3.selectAll(".edgePath, .edgeLabel")
         .on("mouseover", function(d) {
-          let dClass = d3.select(this).attr("class");
+          let dClass = d3.select(this).attr("class"); // TODO: All these "this" here?
           if (dClass === "edgePath") {
             d3.select(this)
               .select(".path")
@@ -226,7 +251,7 @@ export default {
           }
         })
         .on("mouseout", function(d) {
-          let dClass = d3.select(this).attr("class");
+          let dClass = d3.select(this).attr("class"); // TODO: "this" here?
           if (dClass !== "edgeLabel") {
             d3.select(this)
               .select(".path")
@@ -235,13 +260,14 @@ export default {
               .style("stroke-width", "4");
           }
         })
-        .on("click", function(d) {
-          console.log("clicked edge: " + JSON.stringify(g.edge(d)));
-          if (d !== self.selected_link) {
-            self.selected_link = d;
+        .on("click", d => {
+          console.log("clicked edge: " + JSON.stringify(this.rendered_graph.edge(d)));
+          if (d !== this.selected_link) {
+            this.selected_link = d;
           }
-          self.selected_node = null;
-          self.selectedNode = null;
+          // Deselect node
+          this.selected_node_id = null;
+          this.$store.commit("selectNodeById", null);
         });
     },
     setSVGMouseEvents() {
@@ -250,45 +276,45 @@ export default {
         y: 0,
         scale: 1
       };
-      self.svg_selection
+      let self = this;
+      this.svg_selection
         .on("mousemove", function() {
           // console.log('svg mousemove, md_node_id=' + md_node_id + ', hide_line ' +hide_line);
           if (self.md_node_id) {
-            self.drag_line_selection
-              .classed("hidden", self.hide_line)
-              .attr(
-                "d",
-                "M" +
-                  (self.md_node_x + zoomTrans.x) * zoomTrans.scale +
-                  "," +
-                  (self.md_node_y + zoomTrans.y) * zoomTrans.scale +
-                  "L" +
-                  d3.mouse(this)[0] +
-                  "," +
-                  d3.mouse(this)[1]
-              );
+            self.drag_line_selection.classed("hidden", self.hide_line).attr(
+              "d",
+              "M" +
+              (self.md_node_x + zoomTrans.x) * zoomTrans.scale +
+              "," +
+              (self.md_node_y + zoomTrans.y) * zoomTrans.scale +
+              "L" +
+              d3.mouse(this)[0] + // TODO: what is this "this" referring to???
+                "," +
+                d3.mouse(this)[1]
+            );
           }
         })
-        .on("mouseup", function() {
+        .on("mouseup", () => {
           // console.log('svg mouseup');
-          if (self.md_node_id) {
+          if (this.md_node_id) {
             // TODO: just set self.hide_line = false?
             // hide drag line
-            self.drag_line_selection
+            this.drag_line_selection
               .classed("hidden", true)
               .style("marker-end", "");
           }
           // because :active only works in WebKit?
-          self.svg_selection.classed("active", false);
+          this.svg_selection.classed("active", false);
           // clear mouse event vars
-          self.resetMouseVars();
+          this.resetMouseVars();
         });
     },
     setKeyEvents() {
       // Handle key-press events in body element (as SVG elements cannot detect them)
       d3.select("body")
         .on("keydown", () => {
-          switch (d3.event.keycode) {
+          console.log("Keydown: " + d3.event.keyCode);
+          switch (d3.event.keyCode) {
             // DEL and Backspace
             case 46:
             case 8:
@@ -304,25 +330,33 @@ export default {
             case 17:
               this.ctrlDown = true;
               break;
+            // SHIFT
+            case 16:
+              this.shiftDown = true;
+              break;
             // Z
             case 90:
-              if (this.ctrlDown) {
-                this.$store.commit("undo");
-              }
-              break;
-            // R
-            case 82:
-              if (this.ctrlDown) {
-                this.$store.commit("redo");
+              if (this.ctrlDown && this.shiftDown) {
+                // CTRL+SHIFT+Z
+                console.log("redo");
+                this.$store.commit("redoGraph");
+              } else if (this.ctrlDown) {
+                // CTRL + Z
+                console.log("undo");
+                this.$store.commit("undoGraph");
               }
               break;
           }
         })
         .on("keyup", () => {
-          switch (d3.event.keycode) {
+          switch (d3.event.keyCode) {
             // CTRL
             case 17:
               this.ctrlDown = false;
+              break;
+            // SHIFT
+            case 16:
+              this.shiftDown = false;
               break;
           }
         });
@@ -336,52 +370,21 @@ export default {
     renderGraph() {
       // Create the renderer
       let render = new dagreD3.render();
-      render(self.g_selection, self.rendered_graph);
+      render(this.g_selection, this.rendered_graph);
 
       // define arrow markers for graph links
-      self.setEdgeArrowMarkerStyle();
-      self.setNodeMouseEvents();
-      self.setEdgeMouseEvents();
+      this.setEdgeArrowMarkerStyle();
+      this.setNodeMouseEvents();
+      this.setEdgeMouseEvents();
     },
     refreshGraph() {
+      console.log("Refreshing graph");
       // Preparation of DagreD3 data structures
       this.initGraph();
       this.resetMouseVars();
       this.refreshNodesInRendering();
       this.refreshEdgesInRendering();
       this.renderGraph();
-    },
-    initGraphEditor() {
-      this.refreshGraph();
-      let self = this;
-      // init line displayed when dragging new edges
-      this.drag_line_selection = this.svg_selection
-        .append("svg:path")
-        .attr("class", "link dragline hidden")
-        .attr("marker-mid", "")
-        .attr("d", "M0,0L0,0");
-
-      let zoomTrans = {
-        x: 0,
-        y: 0,
-        scale: 1
-      };
-
-      this.setSVGMouseEvents();
-      this.setKeyEvents();
-
-      // Init zoom events
-      let zoom = d3
-        .zoom()
-        .scaleExtent([0, Infinity])
-        .on("zoom", function() {
-          zoomTrans.x = d3.event.transform.x;
-          zoomTrans.y = d3.event.transform.y;
-          zoomTrans.scale = d3.event.transform.k;
-          self.g_selection.attr("transform", d3.event.transform);
-        });
-
-      self.svg_selection.call(zoom);
     }
   }
 };

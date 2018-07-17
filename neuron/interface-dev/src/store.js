@@ -44,37 +44,59 @@ function UndoRedoGraphPlugin(store) {
     nodes: store.state.nodes,
     edges: store.state.edges
   };
+  console.log("hi");
+  console.log(present);
   let future = [];
+  function updateFlags() {
+    // Update flags for API use
+    store.commit("_SET_UNDOABLE", history.length > 0);
+    store.commit("_SET_REDOABLE", future.length > 0);
+  }
   store.subscribe((mutation, state) => {
     if (undoableMutations.includes(mutation.type)) {
+      console.log(present);
       history.push(present);
       // Create new object with shallow copy of nodes + edges arrays
       present = {
-        nodes: state.graph.nodes.slice(),
-        edges: state.graph.edges.slice()
+        nodes: state.nodes.slice(),
+        edges: state.edges.slice()
       };
+      console.log(present);
       future = [];
+      updateFlags();
     } else if (mutation.type === "undoGraph") {
-      future.push(present);
-      present = history.pop();
-      store.commit("_SET_GRAPH", present.nodes, present.edges);
+      if (history.length > 0) {
+        console.log(present);
+        future.push(present);
+        present = history.pop();
+        console.log(present);
+        store.commit("_SET_GRAPH", present.nodes, present.edges);
+        updateFlags();
+      }
     } else if (mutation.type === "redoGraph") {
       if (future.length > 0) {
         history.push(present);
         present = future.pop();
         store.commit("_SET_GRAPH", present.nodes, present.edges);
+        updateFlags();
       }
     }
-    // Update flags for API use
-    store.commit("_SET_UNDOABLE", history.length > 0);
-    store.commit("_SET_REDOABLE", future.length > 0);
   });
 }
 export default new Vuex.Store({
   state: {
     wsConnected: false,
     wsPayload: "",
-    nodeTypes: [],
+    nodeTypes: [
+      {
+        type: "test",
+        params: {
+          testParam1: 1,
+          testParam2: "lorem"
+        },
+        doc: "test"
+      }
+    ],
     selectedNode: null,
     nodes: [],
     edges: [],
@@ -109,27 +131,30 @@ export default new Vuex.Store({
     emit(state, evt) {},
 
     addNode(state, node) {
-      state.graph.nodes.push(node);
+      state.nodes.push(node);
     },
     addEdge(state, edge) {
-      state.graph.edges.push(edge);
+      state.edges.push(edge);
     },
     removeNodeGivenId(state, nodeId) {
-      state.graph.nodes = state.graph.nodes.filter(n => n.name !== nodeId);
+      state.nodes = state.nodes.filter(n => n.name !== nodeId);
       // Remove associated edges
-      state.graph.edges = state.graph.edges.filter(
+      state.edges = state.edges.filter(
         e => !(e.source === nodeId || e.target === nodeId)
       );
     },
     removeEdge(state, edge) {
-      state.graph.edges = state.graph.edges.filter(
+      state.edges = state.edges.filter(
         e => !(e.source === edge.v && e.target === edge.w)
       );
     },
     selectNodeById(state, nodeId) {
       state.selectedNode =
-        nodeId === null ? null : state.graph.nodes.find(n => n.name === nodeId);
-    }
+        nodeId === null ? null : state.nodes.find(n => n.name === nodeId);
+    },
+    // Used for callbacks on UndoRedoGraphPlugin only
+    undoGraph() {},
+    redoGraph() {}
   },
   actions: {},
   plugins: [NewWebSocketPlugin(), UndoRedoGraphPlugin]
