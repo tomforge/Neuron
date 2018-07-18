@@ -25,12 +25,8 @@ export default {
       g_selection: null,
       drag_line_selection: null,
       zoom: null,
-      zoomTrans: {
-        x: 0,
-        y: 0,
-        scale: 1
-      },
-      nodeCounter: 0,
+      curr_zoom_trans: null,
+      initial_zoom_trans: null,
       selected_node_id: null,
       selected_link: null,
       md_node_id: null,
@@ -38,8 +34,8 @@ export default {
       md_node_x: null,
       md_node_y: null,
       hide_line: true,
-      ctrlDown: false,
-      shiftDown: false
+      ctrl_down: false,
+      shift_down: false
     };
   },
   mounted() {
@@ -288,9 +284,9 @@ export default {
             self.drag_line_selection.classed("hidden", self.hide_line).attr(
               "d",
               "M" +
-              (self.md_node_x + self.zoomTrans.x) * self.zoomTrans.scale +
+              (self.md_node_x + self.curr_zoom_trans.x) * self.curr_zoom_trans.k +
               "," +
-              (self.md_node_y + self.zoomTrans.y) * self.zoomTrans.scale +
+              (self.md_node_y + self.curr_zoom_trans.y) * self.curr_zoom_trans.k +
               "L" +
               d3.mouse(this)[0] + // TODO: what is this "this" referring to???
                 "," +
@@ -333,20 +329,22 @@ export default {
               break;
             // CTRL
             case 17:
-              this.ctrlDown = true;
+              this.ctrl_down = true;
               break;
             // SHIFT
             case 16:
-              this.shiftDown = true;
+              this.shift_down = true;
               break;
             // Z
             case 90:
-              if (this.ctrlDown && this.shiftDown) {
-                // CTRL+SHIFT+Z
-                this.$store.commit("redoGraph");
-              } else if (this.ctrlDown) {
-                // CTRL + Z
-                this.$store.commit("undoGraph");
+              if (this.ctrl_down) {
+                if (this.shift_down) {
+                  // CTRL+SHIFT+Z
+                  this.$store.commit("redoGraph");
+                } else {
+                  // CTRL + Z
+                  this.$store.commit("undoGraph");
+                }
               }
               break;
           }
@@ -355,11 +353,11 @@ export default {
           switch (d3.event.keyCode) {
             // CTRL
             case 17:
-              this.ctrlDown = false;
+              this.ctrl_down = false;
               break;
             // SHIFT
             case 16:
-              this.shiftDown = false;
+              this.shift_down = false;
               break;
           }
         });

@@ -38,7 +38,12 @@ function NewWebSocketPlugin() {
 }
 
 function UndoRedoGraphPlugin(store) {
-  let undoableMutations = ["addNode", "addEdge", "removeNodeGivenId", "removeEdge"];
+  let undoableMutations = [
+    "addNode",
+    "addEdge",
+    "removeNodeGivenId",
+    "removeEdge"
+  ];
   let history = [];
   let present = {
     nodes: store.state.nodes.slice(),

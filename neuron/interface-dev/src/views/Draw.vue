@@ -175,7 +175,7 @@ export default {
   data() {
     return {
       drawer: true,
-      nodeCounter: 0,
+      node_counter: 0,
       searchStr: ""
     };
   },
@@ -208,10 +208,9 @@ export default {
   methods: {
     addNode(node_type) {
       this.$store.commit("addNode", {
-        id: ++this.nodeCounter,
+        id: ++this.node_counter,
         type: node_type.type,
-        name: node_type.type + "<br/> ID: " + this.nodeCounter,
-        params: node_type.params
+        name: node_type.type + "<br/> ID: " + this.node_counter,
         // Deep clone the params, otherwise all the nodes point to the same
         // object
         params: JSON.parse(JSON.stringify(node_type.params))
