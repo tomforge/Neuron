@@ -25,6 +25,11 @@ export default {
       g_selection: null,
       drag_line_selection: null,
       zoom: null,
+      zoomTrans: {
+        x: 0,
+        y: 0,
+        scale: 1
+      },
       nodeCounter: 0,
       selected_node_id: null,
       selected_link: null,
@@ -48,19 +53,14 @@ export default {
       .attr("marker-mid", "")
       .attr("d", "M0,0L0,0");
 
-    let zoomTrans = {
-      x: 0,
-      y: 0,
-      scale: 1
-    };
     // Init zoom events
     this.zoom = d3
       .zoom()
       .scaleExtent([0, Infinity])
       .on("zoom", () => {
-        zoomTrans.x = d3.event.transform.x;
-        zoomTrans.y = d3.event.transform.y;
-        zoomTrans.scale = d3.event.transform.k;
+        this.zoomTrans.x = d3.event.transform.x;
+        this.zoomTrans.y = d3.event.transform.y;
+        this.zoomTrans.scale = d3.event.transform.k;
         this.g_selection.attr("transform", d3.event.transform);
       });
 
@@ -207,6 +207,20 @@ export default {
           this.md_node = this.rendered_graph.node(d);
           this.md_node_x = this.md_node.x + this.md_node.width / 2;
           this.md_node_y = this.md_node.y;
+
+          this.drag_line_selection
+              .style("marker-end", "url(#end-arrow)")
+              .attr(
+                "d",
+                "M" +
+                  this.md_node_x +
+                  "," +
+                  this.md_node_y +
+                  "L" +
+                  this.md_node_x +
+                  "," +
+                  this.md_node_y
+              );
         })
         .on("mouseup", d => {
           if (!this.md_node_id) return;
@@ -271,11 +285,6 @@ export default {
         });
     },
     setSVGMouseEvents() {
-      let zoomTrans = {
-        x: 0,
-        y: 0,
-        scale: 1
-      };
       let self = this;
       this.svg_selection
         .on("mousemove", function() {
@@ -284,9 +293,9 @@ export default {
             self.drag_line_selection.classed("hidden", self.hide_line).attr(
               "d",
               "M" +
-              (self.md_node_x + zoomTrans.x) * zoomTrans.scale +
+              (self.md_node_x + self.zoomTrans.x) * self.zoomTrans.scale +
               "," +
-              (self.md_node_y + zoomTrans.y) * zoomTrans.scale +
+              (self.md_node_y + self.zoomTrans.y) * self.zoomTrans.scale +
               "L" +
               d3.mouse(this)[0] + // TODO: what is this "this" referring to???
                 "," +
@@ -296,6 +305,9 @@ export default {
         })
         .on("mouseup", () => {
           // console.log('svg mouseup');
+          // Re-enable zoom
+          this.svg_selection.call(this.zoom);
+          
           if (this.md_node_id) {
             // TODO: just set self.hide_line = false?
             // hide drag line
