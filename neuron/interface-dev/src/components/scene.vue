@@ -54,16 +54,17 @@ export default {
       .zoom()
       .scaleExtent([0, Infinity])
       .on("zoom", () => {
-        this.zoomTrans.x = d3.event.transform.x;
-        this.zoomTrans.y = d3.event.transform.y;
-        this.zoomTrans.scale = d3.event.transform.k;
+        // zoom cannot be done on svg directly
         this.g_selection.attr("transform", d3.event.transform);
+        this.curr_zoom_trans = d3.event.transform;
       });
 
     this.setSVGMouseEvents();
     this.setKeyEvents();
 
-    this.svg_selection.call(this.zoom);
+    this.initial_zoom_trans = d3.zoomTransform(this.g_selection.node());
+    this.curr_zoom_trans = this.initial_zoom_trans;
+    this.activateZoom();
     this.refreshGraph();
 
     this.$store.watch(
@@ -82,6 +83,13 @@ export default {
         rankdir: "LR",
         marginx: 20,
         marginy: 20
+      });
+    },
+    activateZoom() {
+      this.svg_selection.call(this.zoom).on("dblclick.zoom", () => {
+        // Reset the zoom on dbl click
+        this.svg_selection.call(this.zoom.transform, d3.zoomIdentity.scale(1));
+        this.curr_zoom_trans = d3.zoomIdentity;
       });
     },
     refreshNodesInRendering() {
@@ -196,7 +204,6 @@ export default {
         .on("mousedown", d => {
           // Disable zoom
           this.svg_selection.on(".zoom", null);
-          console.log("node mousedown");
 
           this.md_node_id = d;
           // Retrieve rendered node using node's id
@@ -205,23 +212,22 @@ export default {
           this.md_node_y = this.md_node.y;
 
           this.drag_line_selection
-              .style("marker-end", "url(#end-arrow)")
-              .attr(
-                "d",
-                "M" +
-                  this.md_node_x +
-                  "," +
-                  this.md_node_y +
-                  "L" +
-                  this.md_node_x +
-                  "," +
-                  this.md_node_y
-              );
+            .style("marker-end", "url(#end-arrow)")
+            .attr(
+              "d",
+              "M" +
+                this.md_node_x +
+                "," +
+                this.md_node_y +
+                "L" +
+                this.md_node_x +
+                "," +
+                this.md_node_y
+            );
         })
         .on("mouseup", d => {
           if (!this.md_node_id) return;
-          // Re-enable zoom
-          this.svg_selection.call(this.zoom);
+          this.activateZoom();
           // needed by FF
           this.drag_line_selection
             .classed("hidden", true)
@@ -296,9 +302,7 @@ export default {
         })
         .on("mouseup", () => {
           // console.log('svg mouseup');
-          // Re-enable zoom
-          this.svg_selection.call(this.zoom);
-          
+          this.activateZoom();
           if (this.md_node_id) {
             // TODO: just set self.hide_line = false?
             // hide drag line
