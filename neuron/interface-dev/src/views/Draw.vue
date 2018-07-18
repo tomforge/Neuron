@@ -213,8 +213,6 @@ export default {
         name: node_type.type + "<br/> ID: " + this.nodeCounter,
         params: node_type.params
       });
-      console.log("added a node");
-      console.log(this.$store.state.nodes);
     }
   },
 

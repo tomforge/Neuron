@@ -228,7 +228,7 @@ export default {
             //Check if there is an existing edge between mousedown and mouseup nodes
             let existing_edge = this.rendered_graph.edge(this.md_node_id, d);
             if (!existing_edge) {
-              this.edges.push({
+              this.$store.commit("addEdge", {
                 source: this.md_node_id,
                 target: d
               });
@@ -313,11 +313,9 @@ export default {
       // Handle key-press events in body element (as SVG elements cannot detect them)
       d3.select("body")
         .on("keydown", () => {
-          console.log("Keydown: " + d3.event.keyCode);
           switch (d3.event.keyCode) {
-            // DEL and Backspace
+            // DEL
             case 46:
-            case 8:
               if (this.selected_node_id) {
                 this.$store.commit("removeNodeGivenId", this.selected_node_id);
                 this.$store.commit("selectNodeById", null);
@@ -338,11 +336,9 @@ export default {
             case 90:
               if (this.ctrlDown && this.shiftDown) {
                 // CTRL+SHIFT+Z
-                console.log("redo");
                 this.$store.commit("redoGraph");
               } else if (this.ctrlDown) {
                 // CTRL + Z
-                console.log("undo");
                 this.$store.commit("undoGraph");
               }
               break;
@@ -367,7 +363,12 @@ export default {
       this.md_node_y = null;
       this.hide_line = true;
     },
-    renderGraph() {
+    refreshGraph() {
+      // Preparation of DagreD3 data structures
+      this.initGraph();
+      this.resetMouseVars();
+      this.refreshNodesInRendering();
+      this.refreshEdgesInRendering();
       // Create the renderer
       let render = new dagreD3.render();
       render(this.g_selection, this.rendered_graph);
@@ -376,15 +377,6 @@ export default {
       this.setEdgeArrowMarkerStyle();
       this.setNodeMouseEvents();
       this.setEdgeMouseEvents();
-    },
-    refreshGraph() {
-      console.log("Refreshing graph");
-      // Preparation of DagreD3 data structures
-      this.initGraph();
-      this.resetMouseVars();
-      this.refreshNodesInRendering();
-      this.refreshEdgesInRendering();
-      this.renderGraph();
     }
   }
 };

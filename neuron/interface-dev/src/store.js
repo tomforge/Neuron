@@ -38,14 +38,12 @@ function NewWebSocketPlugin() {
 }
 
 function UndoRedoGraphPlugin(store) {
-  let undoableMutations = ["addNode", "addEdge", "removeNode", "removeEdge"];
+  let undoableMutations = ["addNode", "addEdge", "removeNodeGivenId", "removeEdge"];
   let history = [];
   let present = {
-    nodes: store.state.nodes,
-    edges: store.state.edges
+    nodes: store.state.nodes.slice(),
+    edges: store.state.edges.slice()
   };
-  console.log("hi");
-  console.log(present);
   let future = [];
   function updateFlags() {
     // Update flags for API use
@@ -54,30 +52,26 @@ function UndoRedoGraphPlugin(store) {
   }
   store.subscribe((mutation, state) => {
     if (undoableMutations.includes(mutation.type)) {
-      console.log(present);
       history.push(present);
       // Create new object with shallow copy of nodes + edges arrays
       present = {
         nodes: state.nodes.slice(),
         edges: state.edges.slice()
       };
-      console.log(present);
       future = [];
       updateFlags();
     } else if (mutation.type === "undoGraph") {
       if (history.length > 0) {
-        console.log(present);
         future.push(present);
         present = history.pop();
-        console.log(present);
-        store.commit("_SET_GRAPH", present.nodes, present.edges);
+        store.commit("_SET_GRAPH", present);
         updateFlags();
       }
     } else if (mutation.type === "redoGraph") {
       if (future.length > 0) {
         history.push(present);
         present = future.pop();
-        store.commit("_SET_GRAPH", present.nodes, present.edges);
+        store.commit("_SET_GRAPH", present);
         updateFlags();
       }
     }
@@ -118,9 +112,9 @@ export default new Vuex.Store({
         state.nodeTypes = data;
       }
     },
-    _SET_GRAPH(state, nodes, edges) {
-      state.nodes = nodes.slice();
-      state.edges = edges.slice();
+    _SET_GRAPH(state, graph) {
+      state.nodes = graph.nodes.slice();
+      state.edges = graph.edges.slice();
     },
     _SET_REDOABLE(state, redoable) {
       state.redoable = redoable;
