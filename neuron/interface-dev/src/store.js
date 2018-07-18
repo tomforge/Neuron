@@ -143,8 +143,14 @@ export default new Vuex.Store({
       );
     },
     selectNodeById(state, nodeId) {
-      state.selectedNode =
-        nodeId === null ? null : state.nodes.find(n => n.name === nodeId);
+      if (nodeId === null) {
+        state.selectedNode = null;
+      } else if (
+        state.selectedNode === null ||
+        state.selectedNode.name !== nodeId
+      ) {
+        state.selectedNode = state.nodes.find(n => n.name === nodeId);
+      }
     },
     // Used for callbacks on UndoRedoGraphPlugin only
     undoGraph() {},

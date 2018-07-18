@@ -233,10 +233,8 @@ export default {
           // check for drag-to-self (i.e. click)
           if (this.md_node_id === d) {
             // select node
-            if (this.selected_node_id !== d) {
-              this.selected_node_id = d;
-              this.$store.commit("selectNodeById", d);
-            }
+            this.selected_node_id = d;
+            this.$store.commit("selectNodeById", d);
             this.selected_link = null;
           } else {
             //Check if there is an existing edge between mousedown and mouseup nodes
@@ -275,10 +273,7 @@ export default {
           }
         })
         .on("click", d => {
-          console.log("clicked edge: " + JSON.stringify(this.rendered_graph.edge(d)));
-          if (d !== this.selected_link) {
-            this.selected_link = d;
-          }
+          this.selected_link = d;
           // Deselect node
           this.selected_node_id = null;
           this.$store.commit("selectNodeById", null);
@@ -389,6 +384,14 @@ export default {
       this.setEdgeArrowMarkerStyle();
       this.setNodeMouseEvents();
       this.setEdgeMouseEvents();
+      // Deselect node if it is deleted
+      if (
+        this.selected_node_id &&
+        !this.rendered_graph.hasNode(this.selected_node_id)
+      ) {
+        this.selected_node_id = null;
+        this.$store.commit("selectNodeById", null);
+      }
     }
   }
 };

@@ -212,6 +212,9 @@ export default {
         type: node_type.type,
         name: node_type.type + "<br/> ID: " + this.nodeCounter,
         params: node_type.params
+        // Deep clone the params, otherwise all the nodes point to the same
+        // object
+        params: JSON.parse(JSON.stringify(node_type.params))
       });
     }
   },
