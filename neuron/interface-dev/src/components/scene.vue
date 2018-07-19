@@ -289,13 +289,13 @@ export default {
               .attr(
                 "d",
                 "M" +
-                (self.md_node.x + self.curr_zoom_trans.x) *
-                  self.curr_zoom_trans.k +
-                "," +
-                (self.md_node.y + self.curr_zoom_trans.y) *
-                  self.curr_zoom_trans.k +
-                "L" +
-                d3.mouse(this)[0] + // TODO: what is this "this" referring to???
+                  (self.md_node.x * self.curr_zoom_trans.k +
+                    self.curr_zoom_trans.x) +
+                  "," +
+                  (self.md_node.y * self.curr_zoom_trans.k +
+                    self.curr_zoom_trans.y) +
+                  "L" +
+                  d3.mouse(this)[0] +
                   "," +
                   d3.mouse(this)[1]
               );
