@@ -45,7 +45,7 @@ export default {
     this.drag_line_selection = this.svg_selection
       .append("svg:path")
       .attr("class", "link dragline hidden")
-      .attr("marker-mid", "")
+      .attr("marker-end", "url(#end-arrow)")
       .attr("d", "M0,0L0,0");
 
     // Init zoom events
@@ -193,22 +193,19 @@ export default {
       // Handle mouse events for nodes
       d3.selectAll("svg g.node")
         .on("mouseover", d => {
-          // console.log("turn off zoom")
-          // this.svg_selection.on(".zoom", null);
+          d3.event.preventDefault();
           //TODO: Highlight on hover
         })
         .on("mouseout", d => {
-          console.log("node mouseout")
-          // console.log("activate zoom")
-          // this.activateZoom();
+          d3.event.preventDefault();
+          console.log("node mouseout");
           if (this.md_node_id === d) {
             this.hide_line = false;
           }
-        }).on("dragend", d => { console.log("node drag end");
-        this.hide_line = true;
-        this.resetMouseVars();})
+        })
         .on("mousedown", d => {
-          console.log("node mousedown")
+          d3.event.preventDefault();
+          console.log("node mousedown");
           // Disable zoom
           d3.event.stopPropagation();
 
@@ -217,14 +214,11 @@ export default {
           this.md_node = this.rendered_graph.node(d);
         })
         .on("mouseup", d => {
-          console.log("node mouseup")
+          d3.event.preventDefault();
+          console.log("node mouseup");
           d3.event.stopPropagation();
-          this.hide_line = true;
+          this.hideDragLine();
           if (!this.md_node_id) return;
-          // needed by FF
-          // this.drag_line_selection
-          //   .classed("hidden", true)
-          //   .style("marker-end", "");
           // check for drag-to-self (i.e. click)
           if (this.md_node_id === d) {
             // select node
@@ -246,6 +240,7 @@ export default {
         })
         .on("dblclick", () => {
           // Don't zoom if dbl clicked
+          d3.event.preventDefault();
           d3.event.stopPropagation();
         });
     },
@@ -282,10 +277,10 @@ export default {
       let self = this;
       this.svg_selection
         .on("mousemove", function() {
-          self.drag_line_selection.classed("hidden", self.hide_line);
-          // console.log('svg mousemove, md_node_id=' + md_node_id + ', hide_line ' +hide_line);
-          if (self.md_node_id) {
+          d3.event.preventDefault();
+          if (!self.hide_line) {
             self.drag_line_selection
+              .classed("hidden", false)
               .attr(
                 "d",
                 "M" +
@@ -299,24 +294,26 @@ export default {
                   "," +
                   d3.mouse(this)[1]
               );
-              // .style("marker-end", self.hide_line ? "" : "url(#end-arrow)");
           }
         })
-    .on("dragend", d => { console.log("node drag end")})
         .on("mouseup", () => {
-          console.log('svg mouseup');
-          this.hide_line = true;
-          if (this.md_node_id) {
-            // TODO: just set self.hide_line = false?
-            // hide drag line
-            // this.drag_line_selection
-            //   .classed("hidden", true)
-            //   .style("marker-end", "");
-          }
+          d3.event.preventDefault();
+          console.log("svg mouseup");
+          this.hideDragLine();
           // because :active only works in WebKit?
           this.svg_selection.classed("active", false);
           // clear mouse event vars
           this.resetMouseVars();
+        })
+        .on("mouseenter", () => {
+          let primaryButtonDown =
+            d3.event.buttons === undefined
+              ? (d3.event.which & 1) === 1
+              : (d3.event.buttons & 1) === 1;
+          if (!primaryButtonDown) {
+            this.hideDragLine();
+            this.resetMouseVars();
+          }
         });
     },
     setKeyEvents() {
@@ -374,6 +371,13 @@ export default {
       this.md_node_x = null;
       this.md_node_y = null;
       this.hide_line = true;
+    },
+    hideDragLine() {
+      this.hide_line = true;
+      this.drag_line_selection
+        .classed("hidden", true)
+        .attr("marker-mid", "")
+        .attr("d", "M0,0L0,0");
     },
     refreshGraph() {
       // Preparation of DagreD3 data structures
