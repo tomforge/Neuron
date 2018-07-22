@@ -380,7 +380,12 @@ export default {
         .attr("d", "M0,0L0,0");
     },
     refreshGraph() {
-      // Preparation of DagreD3 data structures
+      // Reset to zoom 1 before refresh, then zoom back at the end
+      // Workaround for known bug with dagreD3 html nodes (https://github.com/dagrejs/dagre-d3/issues/251)
+      let curr_k = this.curr_zoom_trans.k;
+      let curr_x = this.curr_zoom_trans.x;
+      let curr_y = this.curr_zoom_trans.y;
+      this.svg_selection.call(this.zoom.transform, d3.zoomIdentity.scale(1));
       this.initGraph();
       this.resetMouseVars();
       this.refreshNodesInRendering();
@@ -401,6 +406,11 @@ export default {
         this.selected_node_id = null;
         this.$store.commit("selectNodeById", null);
       }
+      // Zoom back to where the user was
+      this.svg_selection.call(
+        this.zoom.transform,
+        d3.zoomIdentity.translate(curr_x, curr_y).scale(curr_k)
+      );
     }
   }
 };
