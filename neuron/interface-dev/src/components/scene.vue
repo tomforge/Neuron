@@ -44,7 +44,7 @@ export default {
     // init line displayed when dragging new edges
     this.drag_line_selection = this.svg_selection
       .append("svg:path")
-      .attr("class", "link dragline hidden")
+      .attr("class", "dragline hidden")
       .attr("marker-end", "url(#end-arrow)")
       .attr("d", "M0,0L0,0");
 
@@ -103,7 +103,7 @@ export default {
           class: "comp",
           rx: 5,
           ry: 5,
-          width: 150
+          width: 100
         });
       });
     },
@@ -113,8 +113,6 @@ export default {
           label: "",
           labelStyle: "fill: #FFFFFF",
           arrowhead: "vee",
-          arrowheadStyle: "fill: #a5a5a5",
-          style: "stroke: #a5a5a5;",
           lineInterpolate: "bundle"
         });
       });
@@ -196,10 +194,6 @@ export default {
     setNodeMouseEvents() {
       // Handle mouse events for nodes
       d3.selectAll("svg g.node")
-        .on("mouseover", d => {
-          d3.event.preventDefault();
-          //TODO: Highlight on hover
-        })
         .on("mouseout", d => {
           d3.event.preventDefault();
           console.log("node mouseout");
@@ -249,32 +243,40 @@ export default {
         });
     },
     setEdgeMouseEvents() {
+      let self = this;
       d3.selectAll(".edgePath, .edgeLabel")
-        .on("mouseover", function(d) {
-          let dClass = d3.select(this).attr("class"); // TODO: All these "this" here?
+        .on("mouseover", function() {
+          let dClass = d3.select(this).attr("class");
           if (dClass === "edgePath") {
             d3.select(this)
-              .select(".path")
+              .select("path")
               .transition()
               .duration(25)
-              .style("stroke-width", "8");
+              .style("stroke-width", "6");
           }
         })
-        .on("mouseout", function(d) {
-          let dClass = d3.select(this).attr("class"); // TODO: "this" here?
+        .on("mouseout", function() {
+          let dClass = d3.select(this).attr("class");
           if (dClass !== "edgeLabel") {
             d3.select(this)
-              .select(".path")
+              .select("path")
               .transition()
               .duration(50)
               .style("stroke-width", "4");
           }
         })
-        .on("click", d => {
-          this.selected_link = d;
+        .on("click", function(d) {
+          self.selected_link = d;
           // Deselect node
-          this.selected_node_id = null;
-          this.$store.commit("selectNodeById", null);
+          self.selected_node_id = null;
+          self.$store.commit("selectNodeById", null);
+          d3.selectAll(".edgePath")
+            .selectAll("path")
+            .classed("selected", false);
+          d3.select(this)
+            .select("path")
+            .classed("selected", true);
+        })
         .on("dblclick", () => {
           // Don't zoom if dbl clicked
           d3.event.preventDefault();
@@ -436,56 +438,29 @@ svg {
 
 .node.comp rect {
   fill: #2378ce;
-  width: 200px;
 }
 
 .node:hover {
   filter: url(#drop_shadow);
 }
 
-.node.comp.ext rect {
-  fill: #2378ce;
-  width: 444px;
-}
-
-.node.comp.new rect {
-  fill: #76ace2;
-  width: 200px;
-}
-
-.node.host rect {
-  fill: #239ddb;
-  width: 150px;
-}
-
+/* Style for the node label*/
 .node g div {
-  fill: #239ddb;
-  width: 150px;
-  height: 48px;
-}
-
-.node .ext g div {
-  fill: #239ddb;
-  width: 250px;
-  height: 48px;
-}
-
-.node g div img {
-  width: 48px;
-  height: 48px;
+  cursor: default;
 }
 
 .edgeLabel rect {
   fill: #f45;
 }
 
-.edgePath path.path {
+.edgePath path {
   stroke-width: 4px;
-  fill: none;
-}
-
-.edgePath path.path .new {
   stroke: #a5a5a5;
+  fill: #a5a5a5;
+}
+.edgePath path.selected {
+  stroke: red;
+  fill: red;
 }
 
 .edgePath {
@@ -559,27 +534,15 @@ svg {
   color: #fefefe;
 }
 
-path.link {
-  fill: none;
+path.dragline {
+  pointer-events: none;
   stroke: #a5a5a5;
-  stroke-width: 4px;
+  stroke-width: 3px;
   stroke-dasharray: 10, 2;
   cursor: default;
 }
 
-svg:not(.active):not(.ctrl) path.link {
-  cursor: pointer;
-}
-
-path.link.selected {
-  stroke-dasharray: 10, 2;
-}
-
-path.link.dragline {
-  pointer-events: none;
-}
-
-path.link.hidden {
+path.hidden {
   stroke-width: 0;
 }
 </style>

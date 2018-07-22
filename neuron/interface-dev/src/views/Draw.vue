@@ -214,7 +214,7 @@ export default {
       this.$store.commit("addNode", {
         id: ++this.node_counter,
         type: node_type.type,
-        name: node_type.type + "<br/> ID: " + this.node_counter,
+        name: node_type.type + this.node_counter,
         // Deep clone the params, otherwise all the nodes point to the same
         // object
         params: JSON.parse(JSON.stringify(node_type.params))
