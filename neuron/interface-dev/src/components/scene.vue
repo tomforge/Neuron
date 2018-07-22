@@ -69,7 +69,11 @@ export default {
       // The only operations are addition and removal, so we only
       // need to track the length of the two arrays. Multiply edges by
       // prime number to ensure uniqueness
-      state => state.nodes.length + 17 * state.edges.length,
+      state => {
+        let x = state.nodes.length;
+        let y = state.edges.length;
+        return ((x + y) * (x + y + 1)) / 2 + y;
+      },
       this.refreshGraph
     );
   },
