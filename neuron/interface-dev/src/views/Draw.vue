@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid fill-height>
+    <v-container fluid fill-height id="draw-panel">
         <!-- LEFT DRAWER -->
         <v-navigation-drawer v-model="drawer" class="pa-0 noscroll left-pane-style" clipped app permanent>
             <v-layout column fill-height>
@@ -145,6 +145,10 @@
   border-right: 4px solid #191919;
   border-bottom: hidden;
   border-radius: 5px;
+}
+
+#draw-panel {
+  overflow: hidden;
 }
 
 /* No inbuilt way to change data-table color, so override bg-color manually. */

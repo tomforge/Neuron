@@ -427,7 +427,7 @@ svg {
   /* idk why the height can't use 100% */
   height: 100%;
   width: 100%;
-  overflow: visible;
+  overflow: visible !important;
 }
 
 .node.comp rect {
