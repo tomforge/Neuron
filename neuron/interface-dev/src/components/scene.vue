@@ -275,6 +275,10 @@ export default {
           // Deselect node
           this.selected_node_id = null;
           this.$store.commit("selectNodeById", null);
+        .on("dblclick", () => {
+          // Don't zoom if dbl clicked
+          d3.event.preventDefault();
+          d3.event.stopPropagation();
         });
     },
     setSVGMouseEvents() {
