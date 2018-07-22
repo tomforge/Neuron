@@ -127,7 +127,7 @@ export default new Vuex.Store({
     _SET_UNDOABLE(state, undoable) {
       state.undoable = undoable;
     },
-    emit(state, evt) {},
+    emit() {},
 
     addNode(state, node) {
       state.nodes.push(node);

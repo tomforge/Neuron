@@ -95,7 +95,7 @@ export default {
       // this.curr_zoom_trans = d3.zoomIdentity;
       // });
     },
-    refreshNodesInRendering() {
+    setNodes() {
       this.nodes.forEach(node => {
         this.rendered_graph.setNode(node.name, {
           labelType: "html",
@@ -107,7 +107,7 @@ export default {
         });
       });
     },
-    refreshEdgesInRendering() {
+    setEdges() {
       this.edges.forEach(edge => {
         this.rendered_graph.setEdge(edge.source, edge.target, {
           label: "",
@@ -396,8 +396,8 @@ export default {
       this.svg_selection.call(this.zoom.transform, d3.zoomIdentity.scale(1));
       this.initGraph();
       this.resetMouseVars();
-      this.refreshNodesInRendering();
-      this.refreshEdgesInRendering();
+      this.setNodes();
+      this.setEdges();
       // Create the renderer
       let render = new dagreD3.render();
       render(this.g_selection, this.rendered_graph);
