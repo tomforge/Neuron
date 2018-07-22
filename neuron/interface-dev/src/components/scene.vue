@@ -26,7 +26,6 @@ export default {
       drag_line_selection: null,
       zoom: null,
       curr_zoom_trans: null,
-      initial_zoom_trans: null,
       selected_node_id: null,
       selected_link: null,
       md_node_id: null,
@@ -46,7 +45,7 @@ export default {
     this.drag_line_selection = this.svg_selection
       .append("svg:path")
       .attr("class", "link dragline hidden")
-      .attr("marker-mid", "")
+      .attr("marker-end", "url(#end-arrow)")
       .attr("d", "M0,0L0,0");
 
     // Init zoom events
@@ -62,8 +61,7 @@ export default {
     this.setSVGMouseEvents();
     this.setKeyEvents();
 
-    this.initial_zoom_trans = d3.zoomTransform(this.g_selection.node());
-    this.curr_zoom_trans = this.initial_zoom_trans;
+    this.curr_zoom_trans = d3.zoomTransform(this.g_selection.node());
     this.activateZoom();
     this.refreshGraph();
 
@@ -71,7 +69,11 @@ export default {
       // The only operations are addition and removal, so we only
       // need to track the length of the two arrays. Multiply edges by
       // prime number to ensure uniqueness
-      state => state.nodes.length + 17 * state.edges.length,
+      state => {
+        let x = state.nodes.length;
+        let y = state.edges.length;
+        return ((x + y) * (x + y + 1)) / 2 + y;
+      },
       this.refreshGraph
     );
   },
@@ -86,11 +88,12 @@ export default {
       });
     },
     activateZoom() {
-      this.svg_selection.call(this.zoom).on("dblclick.zoom", () => {
-        // Reset the zoom on dbl click
-        this.svg_selection.call(this.zoom.transform, d3.zoomIdentity.scale(1));
-        this.curr_zoom_trans = d3.zoomIdentity;
-      });
+      this.svg_selection.call(this.zoom);
+      // .on("dblclick.zoom", () => {
+      // // Reset the zoom on dbl click
+      // this.svg_selection.call(this.zoom.transform, d3.zoomIdentity.scale(1));
+      // this.curr_zoom_trans = d3.zoomIdentity;
+      // });
     },
     refreshNodesInRendering() {
       this.nodes.forEach(node => {
@@ -193,45 +196,33 @@ export default {
     setNodeMouseEvents() {
       // Handle mouse events for nodes
       d3.selectAll("svg g.node")
-        .on("mouseover", function(d) {
+        .on("mouseover", d => {
+          d3.event.preventDefault();
           //TODO: Highlight on hover
         })
         .on("mouseout", d => {
+          d3.event.preventDefault();
+          console.log("node mouseout");
           if (this.md_node_id === d) {
             this.hide_line = false;
           }
         })
         .on("mousedown", d => {
+          d3.event.preventDefault();
+          console.log("node mousedown");
           // Disable zoom
-          this.svg_selection.on(".zoom", null);
+          d3.event.stopPropagation();
 
           this.md_node_id = d;
           // Retrieve rendered node using node's id
           this.md_node = this.rendered_graph.node(d);
-          this.md_node_x = this.md_node.x + this.md_node.width / 2;
-          this.md_node_y = this.md_node.y;
-
-          this.drag_line_selection
-            .style("marker-end", "url(#end-arrow)")
-            .attr(
-              "d",
-              "M" +
-                this.md_node_x +
-                "," +
-                this.md_node_y +
-                "L" +
-                this.md_node_x +
-                "," +
-                this.md_node_y
-            );
         })
         .on("mouseup", d => {
+          d3.event.preventDefault();
+          console.log("node mouseup");
+          d3.event.stopPropagation();
+          this.hideDragLine();
           if (!this.md_node_id) return;
-          this.activateZoom();
-          // needed by FF
-          this.drag_line_selection
-            .classed("hidden", true)
-            .style("marker-end", "");
           // check for drag-to-self (i.e. click)
           if (this.md_node_id === d) {
             // select node
@@ -250,6 +241,11 @@ export default {
             this.refreshGraph();
           }
           this.resetMouseVars();
+        })
+        .on("dblclick", () => {
+          // Don't zoom if dbl clicked
+          d3.event.preventDefault();
+          d3.event.stopPropagation();
         });
     },
     setEdgeMouseEvents() {
@@ -285,35 +281,43 @@ export default {
       let self = this;
       this.svg_selection
         .on("mousemove", function() {
-          // console.log('svg mousemove, md_node_id=' + md_node_id + ', hide_line ' +hide_line);
-          if (self.md_node_id) {
-            self.drag_line_selection.classed("hidden", self.hide_line).attr(
-              "d",
-              "M" +
-              (self.md_node_x + self.curr_zoom_trans.x) * self.curr_zoom_trans.k +
-              "," +
-              (self.md_node_y + self.curr_zoom_trans.y) * self.curr_zoom_trans.k +
-              "L" +
-              d3.mouse(this)[0] + // TODO: what is this "this" referring to???
-                "," +
-                d3.mouse(this)[1]
-            );
+          d3.event.preventDefault();
+          if (!self.hide_line) {
+            self.drag_line_selection
+              .classed("hidden", false)
+              .attr(
+                "d",
+                "M" +
+                  (self.md_node.x * self.curr_zoom_trans.k +
+                    self.curr_zoom_trans.x) +
+                  "," +
+                  (self.md_node.y * self.curr_zoom_trans.k +
+                    self.curr_zoom_trans.y) +
+                  "L" +
+                  d3.mouse(this)[0] +
+                  "," +
+                  d3.mouse(this)[1]
+              );
           }
         })
         .on("mouseup", () => {
-          // console.log('svg mouseup');
-          this.activateZoom();
-          if (this.md_node_id) {
-            // TODO: just set self.hide_line = false?
-            // hide drag line
-            this.drag_line_selection
-              .classed("hidden", true)
-              .style("marker-end", "");
-          }
+          d3.event.preventDefault();
+          console.log("svg mouseup");
+          this.hideDragLine();
           // because :active only works in WebKit?
           this.svg_selection.classed("active", false);
           // clear mouse event vars
           this.resetMouseVars();
+        })
+        .on("mouseenter", () => {
+          let primaryButtonDown =
+            d3.event.buttons === undefined
+              ? (d3.event.which & 1) === 1
+              : (d3.event.buttons & 1) === 1;
+          if (!primaryButtonDown) {
+            this.hideDragLine();
+            this.resetMouseVars();
+          }
         });
     },
     setKeyEvents() {
@@ -372,8 +376,20 @@ export default {
       this.md_node_y = null;
       this.hide_line = true;
     },
+    hideDragLine() {
+      this.hide_line = true;
+      this.drag_line_selection
+        .classed("hidden", true)
+        .attr("marker-mid", "")
+        .attr("d", "M0,0L0,0");
+    },
     refreshGraph() {
-      // Preparation of DagreD3 data structures
+      // Reset to zoom 1 before refresh, then zoom back at the end
+      // Workaround for known bug with dagreD3 html nodes (https://github.com/dagrejs/dagre-d3/issues/251)
+      let curr_k = this.curr_zoom_trans.k;
+      let curr_x = this.curr_zoom_trans.x;
+      let curr_y = this.curr_zoom_trans.y;
+      this.svg_selection.call(this.zoom.transform, d3.zoomIdentity.scale(1));
       this.initGraph();
       this.resetMouseVars();
       this.refreshNodesInRendering();
@@ -394,6 +410,11 @@ export default {
         this.selected_node_id = null;
         this.$store.commit("selectNodeById", null);
       }
+      // Zoom back to where the user was
+      this.svg_selection.call(
+        this.zoom.transform,
+        d3.zoomIdentity.translate(curr_x, curr_y).scale(curr_k)
+      );
     }
   }
 };
