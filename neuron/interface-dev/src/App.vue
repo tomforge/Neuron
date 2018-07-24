@@ -17,6 +17,7 @@
       </v-tabs>
     </v-toolbar-items>
     <v-spacer></v-spacer>
+    <v-btn small color="primary" v-on:click.native="build_graph()">BUILD GRAPH</v-btn>
     <v-menu bottom left offset-y>
       <v-btn slot="activator" icon>
         <v-icon>settings</v-icon>
@@ -76,6 +77,17 @@ export default {
         }
       ]
     };
+  },
+  methods: {
+    build_graph() {
+      this.$store.commit("emit", [
+        "API_build_graph",
+        {
+          nodes: this.$store.state.nodes,
+          edges: this.$store.state.edges
+        }
+      ]);
+    }
   }
 };
 </script>
