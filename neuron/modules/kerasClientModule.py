@@ -23,6 +23,7 @@ class KerasClientModule(BaseModule):
         self.inputs = []
         self.outputs = []
         self.router.addSubscription(self, "API_get_node_meta")
+        self.router.addSubscription(self, "API_build_graph")
         logger.debug("Started up")
 
     def shutdown(self):
@@ -32,6 +33,8 @@ class KerasClientModule(BaseModule):
         logger.debug("Received event: " + eventType + " from " + sender)
         if eventType == "API_get_node_meta":
             self.API_get_node_meta(sender)
+        elif eventType == "API_build_graph":
+            self.API_build_graph(data)
 
     def clear_graph(self):
         self.id_to_node = {}
@@ -41,10 +44,12 @@ class KerasClientModule(BaseModule):
 
     def build_graph_meta(self, graph):
         for node in graph["nodes"]:
+            logger.info(node.items())
             self.id_to_op[node["id"]] = self.build_op(node)
             self.adj_list[node["id"]] = []
             self.reverse_adj_list[node["id"]] = []
         for edge in graph["edges"]:
+            logger.info(edge.items())
             self.adj_list[edge["src"]].append(edge["dest"])
             self.reverse_adj_list[edge["dest"]].append(edge["src"])
 
