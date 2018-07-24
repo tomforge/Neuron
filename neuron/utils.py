@@ -61,8 +61,8 @@ def match_expr(expr):
         return match_ident(expr)
     elif expr[0] == "'" or expr[0] == '"':
         return match_string_expr(expr)
-    elif expr[0] == "(":
-        return match_tuple_expr(expr)
+    elif expr[0] == "(" or expr[0] == "[":
+        return match_tuple_and_list_expr(expr)
     else:
         return match_numeric_expr(expr)
 
@@ -94,18 +94,19 @@ def match_string_expr(expr):
         return match.group(0)[1:-1], expr[match.span()[1]:]
 
 
-def match_tuple_expr(expr):
-    """ Matches a tuple or expressions, comma separated and enclosed by round brackets"""
+def match_tuple_and_list_expr(expr, isList):
+    """ Matches a tuple/list of expressions, comma separated and enclosed by round brackets"""
+    terminating_char = "]" if isList else ")"
     child_list = []
     # Strip the leading open bracket
     expr = expr[1:].lstrip()
-    while expr and expr[0] != ")":
+    while expr and expr[0] != terminating_char:
         child, expr = match_expr(expr)
         child_list.append(child)
         expr = expr.lstrip()
         if expr[0] == ",":
             expr = expr[1:].lstrip()
-        elif expr[0] != ")":
+        elif expr[0] != terminating_char:
             raise ValueError("Invalid expression!")
 
     if not expr:
