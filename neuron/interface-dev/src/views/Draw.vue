@@ -7,8 +7,6 @@
                     <v-tabs slider-color="grey darken-4">
                         <div class="attr-selection" style="width: 100%; height:100%">
                             <v-tab active-class="grey darken-3">Add Nodes</v-tab>
-                            <v-tab active-class="grey darken-3">LOREM</v-tab>
-                            <v-tab active-class="grey darken-3">IPSUM</v-tab>
                         </div>
                     </v-tabs>
                 </v-flex>

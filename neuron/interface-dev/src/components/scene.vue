@@ -202,14 +202,12 @@ export default {
         })
         .on("mouseout", d => {
           d3.event.preventDefault();
-          console.log("node mouseout");
           if (this.md_node_id === d) {
             this.hide_line = false;
           }
         })
         .on("mousedown", d => {
           d3.event.preventDefault();
-          console.log("node mousedown");
           // Disable zoom
           d3.event.stopPropagation();
 
@@ -219,7 +217,7 @@ export default {
         })
         .on("mouseup", d => {
           d3.event.preventDefault();
-          console.log("node mouseup");
+          console.log("node " + d + " mouseup");
           d3.event.stopPropagation();
           this.hideDragLine();
           if (!this.md_node_id) return;
@@ -271,6 +269,7 @@ export default {
           }
         })
         .on("click", d => {
+          console.log("edge " + d + " clicked");
           this.selected_link = d;
           // Deselect node
           this.selected_node_id = null;
@@ -307,7 +306,6 @@ export default {
         })
         .on("mouseup", () => {
           d3.event.preventDefault();
-          console.log("svg mouseup");
           this.hideDragLine();
           // because :active only works in WebKit?
           this.svg_selection.classed("active", false);
