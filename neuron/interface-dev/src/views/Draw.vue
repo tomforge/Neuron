@@ -212,7 +212,7 @@ export default {
   methods: {
     addNode(node_type) {
       this.$store.commit("addNode", {
-        id: ++this.node_counter,
+        id: "" + ++this.node_counter, // Make id a string
         type: node_type.type,
         name: node_type.type + "<br/> ID: " + this.node_counter,
         // Deep clone the params, otherwise all the nodes point to the same

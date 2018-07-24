@@ -136,7 +136,7 @@ export default new Vuex.Store({
       state.edges.push(edge);
     },
     removeNodeGivenId(state, nodeId) {
-      state.nodes = state.nodes.filter(n => n.name !== nodeId);
+      state.nodes = state.nodes.filter(n => n.id !== nodeId);
       // Remove associated edges
       state.edges = state.edges.filter(
         e => !(e.source === nodeId || e.target === nodeId)
@@ -152,9 +152,9 @@ export default new Vuex.Store({
         state.selectedNode = null;
       } else if (
         state.selectedNode === null ||
-        state.selectedNode.name !== nodeId
+        state.selectedNode.id !== nodeId
       ) {
-        state.selectedNode = state.nodes.find(n => n.name === nodeId);
+        state.selectedNode = state.nodes.find(n => n.id === nodeId);
       }
     },
     // Used for callbacks on UndoRedoGraphPlugin only

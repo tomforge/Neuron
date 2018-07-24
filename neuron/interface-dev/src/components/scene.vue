@@ -97,7 +97,7 @@ export default {
     },
     setNodes() {
       this.nodes.forEach(node => {
-        this.rendered_graph.setNode(node.name, {
+        this.rendered_graph.setNode(node.id, {
           labelType: "html",
           label: node.name,
           class: "comp",
