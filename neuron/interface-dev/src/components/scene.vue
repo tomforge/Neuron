@@ -113,7 +113,7 @@ export default {
           label: "",
           labelStyle: "fill: #FFFFFF",
           arrowhead: "vee",
-          lineInterpolate: "bundle"
+          curve: d3.curveBasis
         });
       });
     },
