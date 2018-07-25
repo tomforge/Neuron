@@ -18,8 +18,8 @@ def parse_module_string(module_string):
     Parse module string (from neuron.settings)
     into module name and class name
     """
-    moduleName, className = module_string.rsplit('.', 1)
-    return "neuron.modules." + moduleName, className
+    module_name, class_name = module_string.rsplit('.', 1)
+    return "neuron.modules." + module_name, class_name
 
 
 def get_class(module_string):
@@ -62,7 +62,7 @@ def match_expr(expr):
     elif expr[0] == "'" or expr[0] == '"':
         return match_string_expr(expr)
     elif expr[0] == "(" or expr[0] == "[":
-        return match_tuple_and_list_expr(expr)
+        return match_tuple_and_list_expr(expr, expr[0] == "[")
     else:
         return match_numeric_expr(expr)
 
@@ -94,9 +94,9 @@ def match_string_expr(expr):
         return match.group(0)[1:-1], expr[match.span()[1]:]
 
 
-def match_tuple_and_list_expr(expr, isList):
+def match_tuple_and_list_expr(expr, is_list):
     """ Matches a tuple/list of expressions, comma separated and enclosed by round brackets"""
-    terminating_char = "]" if isList else ")"
+    terminating_char = "]" if is_list else ")"
     child_list = []
     # Strip the leading open bracket
     expr = expr[1:].lstrip()
