@@ -1,6 +1,8 @@
 import importlib
 import json
 import re
+import logging
+logger = logging.getLogger("utils")
 
 PATTERN_NUMERIC = re.compile(r"[+-]?\d+\.?\d*")
 PATTERN_STRING_SINGLE = re.compile(r"'([^']|\\')*'")
@@ -42,7 +44,13 @@ def parse_expr(expr):
     :return: The python expression represented by the string
     :raises ValueError: If no match can be found
     """
+    if expr:
+        logger.debug("Expr: " + str(expr) + " -> " + str(type(expr)))
+    else:
+        logger.debug("Expr: None")
     res, remainder = match_expr(expr)
+    logger.debug(res)
+    logger.debug("Remaining: " + remainder)
     if remainder:
         raise ValueError("Invalid expression!")
     else:
@@ -58,7 +66,10 @@ def match_expr(expr):
     if not expr:
         return None, ""
     elif expr[0].isalpha():
-        return match_ident(expr)
+        try:
+            return match_ident(expr)
+        except ValueError:
+            return match_string_expr(expr)
     elif expr[0] == "'" or expr[0] == '"':
         return match_string_expr(expr)
     elif expr[0] == "(" or expr[0] == "[":

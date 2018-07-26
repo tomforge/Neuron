@@ -17,13 +17,14 @@ function NewWebSocketPlugin() {
     if (socket) {
       socket.onopen = () => store.commit("_SOCKET_CONNECT");
       socket.onclose = () => store.commit("_SOCKET_DISCONNECT");
-      socket.onmessage = evt =>
-        store.commit("_SOCKET_HANDLE_MESSAGE", JSON.parse(evt.data));
+      socket.onmessage = evt =>{console.log(evt.data);
+        store.commit("_SOCKET_HANDLE_MESSAGE", JSON.parse(evt.data))};
       // The plugin subscribes only to the "emit" mutation,
       // to send events to server
       store.subscribe(mutation => {
         if (mutation.type === "emit") {
           let jsonPayload = JSON.stringify(mutation.payload);
+          console.log(jsonPayload)
           // If not ready, wait 500ms before trying again. Only tries once more, if
           // connection is still not up, this message will be lost
           if (!socket.readyState) {
@@ -87,14 +88,14 @@ export default new Vuex.Store({
     wsConnected: false,
     wsPayload: "",
     nodeTypes: [
-      {
-        type: "test",
-        params: {
-          testParam1: 1,
-          testParam2: "lorem"
-        },
-        doc: "test"
-      }
+      // {
+      //   type: "test",
+      //   params: {
+      //     testParam1: 1,
+      //     testParam2: "lorem"
+      //   },
+      //   doc: "test"
+      // }
     ],
     selectedNode: null,
     nodes: [],

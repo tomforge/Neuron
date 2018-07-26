@@ -1,13 +1,16 @@
 import logging
+
 logger = logging.getLogger("server")
 from autobahn.twisted.websocket import WebSocketServerFactory
 from neuron import utils
+
 
 class WSManagerFactory(WebSocketServerFactory):
     """
     Manages all websocket clients and connections. All
     interactions with clients should be made through this class.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # A map of connected clients' addresses to their protocol instances
@@ -64,8 +67,8 @@ class WSManagerFactory(WebSocketServerFactory):
                     self.eventSubscriptions.pop(event)
         except KeyError:
             logger.error("Trying to remove non-existing subscription of "
-                          + str(subscriber)
-                          + ("" if event is None else " to " + str(event)))
+                         + str(subscriber)
+                         + ("" if event is None else " to " + str(event)))
 
     def dispatchToSubscribers(self, event, data, sender):
         """
@@ -83,7 +86,7 @@ class WSManagerFactory(WebSocketServerFactory):
                     logger.error(str(e))
         except KeyError:
             logger.warning("Received unsubscribed event " + str(event)
-                            + " from " + sender.peer)
+                           + " from " + sender.peer)
 
     def triggerEvent(self, event, data, addr=None):
         """
@@ -94,7 +97,7 @@ class WSManagerFactory(WebSocketServerFactory):
         logger.debug(payload)
         if addr is None:
             for _, client in self.clients.items():
-                client.sendMessage(payload, isBinary = False)
+                client.sendMessage(payload, isBinary=False)
         elif addr in self.clients:
             self.clients[addr].sendMessage(payload, isBinary=False)
         else:

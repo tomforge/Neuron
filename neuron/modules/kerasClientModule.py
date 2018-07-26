@@ -4,7 +4,7 @@ from neuron import utils
 import keras
 import logging
 import inspect
-
+import sys
 logger = logging.getLogger("KerasClientModule")
 
 
@@ -73,8 +73,18 @@ class KerasClientModule(BaseModule):
         return topo_ord
 
     def build_op(self, node):
-        params = {k: utils.parse_expr(v) for k, v in node["params"]}
-        return self.node_types[node["type"]](**params)
+        # params = {k: utils.parse_expr(v) for k, v in node["params"].items()}
+        try:
+            logger.debug("NODE TYPE: " + node["type"])
+            logger.debug("OP: " + str(self.node_types[node["type"]]))
+            for k,v in node["params"].items():
+                logger.debug(str(k) + ": " + str(v) + " -> " + str(type(v)))
+            node = self.node_types[node["type"]](**node["params"])
+            logger.debug("NODE: " + str(node))
+        except ValueError as e:
+            logger.error(str(e))
+            raise
+        return node
 
     def API_run_graph(self, output_node):
         pass
@@ -109,7 +119,12 @@ class KerasClientModule(BaseModule):
             for param_name, param in inspect.signature(op).parameters.items():
                 if param_name == "kwargs":
                     continue
-                params[param_name] = None if param.default == inspect.Parameter.empty else param.default
+                if param.default == inspect.Parameter.empty:
+                    params[param_name] = None
+                elif isinstance(param.default, str):
+                    params[param_name] = '"' + param.default + '"'
+                else:
+                    params[param_name] = param.default
 
             node_type = {
                 "type": name,
