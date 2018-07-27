@@ -3,6 +3,7 @@ from neuron.modules.baseModule import BaseModule
 import keras
 import logging
 import inspect
+
 logger = logging.getLogger("KerasClientModule")
 
 
@@ -83,24 +84,27 @@ class KerasClientModule(BaseModule):
         pass
 
     def API_build_graph(self, graph):
-        self.clear_graph()
-        self.build_graph_meta(graph)
-        self.inputs = []
-        self.outputs = []
-        for node_id in self.get_topo_ord():
-            # Retrieve the actual nodes built earlier in this loop
-            arg_list = [self.id_to_node[i] for i in self.reverse_adj_list[node_id]]
-            node = self.id_to_op[node_id](*arg_list)
-            self.id_to_node[node_id] = node
+        try:
+            self.clear_graph()
+            self.build_graph_meta(graph)
+            self.inputs = []
+            self.outputs = []
+            for node_id in self.get_topo_ord():
+                # Retrieve the actual nodes built earlier in this loop
+                arg_list = [self.id_to_node[i] for i in self.reverse_adj_list[node_id]]
+                node = self.id_to_op[node_id](*arg_list)
+                self.id_to_node[node_id] = node
 
-            if not self.adj_list[node_id]:
-                self.outputs.append(node)
-            if not self.reverse_adj_list[node_id]:
-                self.inputs.append(node)
-        if len(self.inputs) == 1:
-            self.inputs = self.inputs[0]
-        if len(self.outputs) == 1:
-            self.outputs = self.outputs[0]
+                if not self.adj_list[node_id]:
+                    self.outputs.append(node)
+                if not self.reverse_adj_list[node_id]:
+                    self.inputs.append(node)
+            if len(self.inputs) == 1:
+                self.inputs = self.inputs[0]
+            if len(self.outputs) == 1:
+                self.outputs = self.outputs[0]
+        except Exception as e:
+            logger.error(str(e))
 
     def API_get_node_meta(self, sender):
         """ Prepare a representation of the internal nodeList array for
