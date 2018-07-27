@@ -71,17 +71,13 @@ class KerasClientModule(BaseModule):
         return topo_ord
 
     def build_op(self, node):
-        try:
-            # logger.debug("NODE TYPE: " + node["type"])
-            # logger.debug("OP: " + str(self.node_types[node["type"]]))
-            params = {}
-            for k,v in node["params"].items():
-                params[k] = None if v is None else eval(v, {}, {})
-                # logger.debug(str(k) + ": " + str(v) + "; " + str(type(v)) + " -> " + str(type(params[k])))
-            return self.node_types[node["type"]](**params)
-        except Exception as e:
-            logger.error(str(e))
-            raise
+        params = {}
+        # node params come in a list of the form [{"name": <param_name>, "value": <param_value>}, ... ]
+        for param in node["params"]:
+            logger.debug(param["name"] + " : " + (param["value"] if param["value"] is not None else None))
+            params[param["name"]] = None if (param["value"] is None or param["value"] == "") else eval(param["value"],
+                                                                                                       {}, {})
+        return self.node_types[node["type"]](**params)
 
     def API_run_graph(self, output_node):
         pass
@@ -112,19 +108,15 @@ class KerasClientModule(BaseModule):
         res = []
         logger.debug("Getting node meta")
         for name, op in self.node_types.items():
-            params = {}
-            for param_name, param in inspect.signature(op).parameters.items():
-                if param_name == "kwargs":
-                    continue
-                if param.default == inspect.Parameter.empty:
-                    params[param_name] = None
-                else:
-                    params[param_name] = repr(param.default)
-
             node_type = {
                 "type": name,
                 "doc": op.__doc__,
-                "params": params
+                "params": [
+                    {
+                        "name": param_name,
+                        "value": repr(param.default) if param.default is not inspect.Parameter.empty else None
+                    } for param_name, param in inspect.signature(op).parameters.items() if param_name != "kwargs"
+                ]
             }
             res.append(node_type)
         self.emit("RES_get_node_meta", res, sender)

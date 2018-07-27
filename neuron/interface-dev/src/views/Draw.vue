@@ -73,19 +73,19 @@
                             </v-flex>
                             <!-- Attributes list -->
                             <v-flex class="scroll">
-                                <v-data-table :items="selectedNode === null ? [] : Object.entries(selectedNode.params)" hide-actions hide-headers>
+                                <v-data-table :items="selectedNode === null ? {} : selectedNode.params" hide-actions hide-headers>
                                     <template slot="items" slot-scope="props">
                                         <tr id="attr-row">
                                             <!-- Attribute name -->
-                                            <th class="text-xs-center"> {{props.item[0] | titleCase}}</th>
+                                            <th class="text-xs-center"> {{props.item.name | titleCase}}</th>
                                             <td class="pa-0">:</td>
                                             <!-- Attribute value -->
                                             <td width="100%">
-                                                <v-edit-dialog :return-value.sync="selectedNode.params[props.item[0]]" lazy>
+                                                <v-edit-dialog :return-value.sync="props.item.value" lazy>
                                                     <!-- Value display -->
-                                                    <span class="text-xs-center">{{props.item[1]}}</span>
+                                                    <span class="text-xs-center">{{props.item.value}}</span>
                                                     <!-- Value edit display -->
-                                                    <v-text-field slot="input" v-model="selectedNode.params[props.item[0]]"
+                                                    <v-text-field slot="input" v-model="props.item.value"
                                                                   label="Edit" single-line></v-text-field>
                                                 </v-edit-dialog>
                                             </td>
