@@ -1,10 +1,8 @@
 from collections import deque
 from neuron.modules.baseModule import BaseModule
-from neuron import utils
 import keras
 import logging
 import inspect
-import sys
 logger = logging.getLogger("KerasClientModule")
 
 
@@ -44,14 +42,14 @@ class KerasClientModule(BaseModule):
 
     def build_graph_meta(self, graph):
         for node in graph["nodes"]:
-            logger.info(node.items())
+            logger.debug(node.items())
             self.id_to_op[node["id"]] = self.build_op(node)
             self.adj_list[node["id"]] = []
             self.reverse_adj_list[node["id"]] = []
         for edge in graph["edges"]:
-            logger.info(edge.items())
-            self.adj_list[edge["src"]].append(edge["dest"])
-            self.reverse_adj_list[edge["dest"]].append(edge["src"])
+            logger.debug(edge.items())
+            self.adj_list[edge["source"]].append(edge["target"])
+            self.reverse_adj_list[edge["target"]].append(edge["source"])
 
     def get_topo_ord(self):
         in_degrees = {}
@@ -73,18 +71,17 @@ class KerasClientModule(BaseModule):
         return topo_ord
 
     def build_op(self, node):
-        # params = {k: utils.parse_expr(v) for k, v in node["params"].items()}
         try:
-            logger.debug("NODE TYPE: " + node["type"])
-            logger.debug("OP: " + str(self.node_types[node["type"]]))
+            # logger.debug("NODE TYPE: " + node["type"])
+            # logger.debug("OP: " + str(self.node_types[node["type"]]))
+            params = {}
             for k,v in node["params"].items():
-                logger.debug(str(k) + ": " + str(v) + " -> " + str(type(v)))
-            node = self.node_types[node["type"]](**node["params"])
-            logger.debug("NODE: " + str(node))
-        except ValueError as e:
+                params[k] = None if v is None else eval(v, {}, {})
+                # logger.debug(str(k) + ": " + str(v) + "; " + str(type(v)) + " -> " + str(type(params[k])))
+            return self.node_types[node["type"]](**params)
+        except Exception as e:
             logger.error(str(e))
             raise
-        return node
 
     def API_run_graph(self, output_node):
         pass
@@ -121,10 +118,8 @@ class KerasClientModule(BaseModule):
                     continue
                 if param.default == inspect.Parameter.empty:
                     params[param_name] = None
-                elif isinstance(param.default, str):
-                    params[param_name] = '"' + param.default + '"'
                 else:
-                    params[param_name] = param.default
+                    params[param_name] = repr(param.default)
 
             node_type = {
                 "type": name,
