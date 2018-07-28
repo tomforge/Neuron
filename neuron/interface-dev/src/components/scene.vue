@@ -34,7 +34,20 @@ export default {
       md_node_y: null,
       hide_line: true,
       ctrl_down: false,
-      shift_down: false
+      shift_down: false,
+      node_colors: {},
+      colors: [
+        "hsl(318, 100%, 60%)",
+        "hsl(345, 100%, 60%)",
+        "hsl(284, 100%, 60%)",
+        "hsl(213, 100%, 60%)",
+        "hsl(186, 100%, 50%)", 
+        "hsl(157, 100%, 50%)",
+        "hsl(119, 100%, 60%)",
+        "hsl(63, 100%, 60%)",
+        "hsl(43, 100%, 60%)",
+        "hsl(21, 100%, 60%)",        
+      ]
     };
   },
   mounted() {
@@ -97,14 +110,26 @@ export default {
     },
     setNodes() {
       this.nodes.forEach(node => {
+        if (!this.node_colors[node.type]) {
+          // let hue = Math.random() * 360;
+          // let sat = "100%";
+          // let lum = 50 + Math.random() * 20 + "%";
+          // this.node_colors[node.type] = "hsl(" + hue + "," + sat + "," + lum + ")";
+          this.node_colors[node.type] = this.colors.shift();
+          this.colors.push(this.node_colors[node.type]);
+        }
         this.rendered_graph.setNode(node.id, {
           labelType: "html",
+          labelStyle: "color: black",
           label: node.name,
           class: "comp",
           rx: 5,
           ry: 5,
-          width: 150
+          width: 150,
+          style: "fill: " + this.node_colors[node.type]
         });
+      console.log(this.node_colors[node.type]);
+        
       });
     },
     setEdges() {
@@ -434,7 +459,7 @@ svg {
 }
 
 .node.comp rect {
-  fill: #2378ce;
+  /* fill: #2378ce; */
   width: 200px;
 }
 
@@ -443,28 +468,28 @@ svg {
 }
 
 .node.comp.ext rect {
-  fill: #2378ce;
+  /* fill: #2378ce; */
   width: 444px;
 }
 
 .node.comp.new rect {
-  fill: #76ace2;
+  /* fill: #76ace2; */
   width: 200px;
 }
 
 .node.host rect {
-  fill: #239ddb;
+  /* fill: #239ddb; */
   width: 150px;
 }
 
 .node g div {
-  fill: #239ddb;
+  /* fill: #239ddb; */
   width: 150px;
   height: 48px;
 }
 
 .node .ext g div {
-  fill: #239ddb;
+  /* fill: #239ddb; */
   width: 250px;
   height: 48px;
 }
