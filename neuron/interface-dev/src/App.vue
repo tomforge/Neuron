@@ -17,7 +17,8 @@
       </v-tabs>
     </v-toolbar-items>
     <v-spacer></v-spacer>
-    <v-btn small color="primary" v-on:click.native="build_graph()">BUILD GRAPH</v-btn>
+    <v-btn v-if="$route.path === '/draw'" small color="primary" v-on:click.native="build_graph()">BUILD GRAPH</v-btn>
+    <v-btn v-if="$route.path === '/run'" small color="success" v-on:click.native="train_graph()">TRAIN</v-btn>
     <v-menu bottom left offset-y>
       <v-btn slot="activator" icon>
         <v-icon>settings</v-icon>
@@ -87,6 +88,9 @@ export default {
           edges: this.$store.state.edges
         }
       ]);
+    },
+    train_graph() {
+      this.$store.commit("emit", ["API_train_graph", {}]);
     }
   }
 };
