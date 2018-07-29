@@ -87,6 +87,7 @@ export default new Vuex.Store({
   state: {
     wsConnected: false,
     wsPayload: "",
+    errors: [],
     nodeTypes: [
       // {
       //   type: "test",
@@ -114,7 +115,9 @@ export default new Vuex.Store({
     },
     _SOCKET_HANDLE_MESSAGE(state, msg) {
       let [eventType, data] = msg;
-      if (eventType === "RES_get_node_meta") {
+      if (eventType === "RES_error") {
+        state.errors.push(data);
+      } else if (eventType === "RES_get_node_meta") {
         state.nodeTypes = data;
       }
     },
