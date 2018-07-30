@@ -254,4 +254,12 @@ export default {
 .TreeViewTransition-leave-active {
   transition: all 0.3s ease-in-out;
 }
+
+ul {
+  padding: 0px 0px 0px 10px;
+}
+
+li {
+  padding: 0px 0px 0px 10px;
+}
 </style>
